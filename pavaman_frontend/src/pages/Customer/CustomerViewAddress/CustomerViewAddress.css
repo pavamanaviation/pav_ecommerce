@@ -1,0 +1,303 @@
+
+.address-list {
+    margin: 20px auto;
+    padding: 20px;
+    max-width: 1200px;
+    border-radius: 12px;
+    background: linear-gradient(to bottom right, #f9f9f9, #e3efff);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 70%;
+}
+
+.address-heading{
+    height: 48px;
+    text-transform: uppercase;
+    color: #878787;
+    font-size: 22px;
+    font-weight: 500;
+    padding: 14px 24px;
+    border-radius: 2px 2px 0 0;
+    color: #fff;
+    background-color:#4450A2;
+}
+
+.add-address-btn {
+    display: block;
+    margin: 0 auto 20px;
+    padding: 12px 20px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+    background-color:#4450A2;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+
+.address-item {
+    display: flex;
+    /* border: 1px solid #ddd; */
+    /* border-radius: 10px; */
+    margin-bottom: 15px;
+    padding: 15px;
+    /* background-color: #fff; */
+    transition: box-shadow 0.3s;
+    position: relative;
+    justify-content: space-evenly;
+}
+
+.address-list-item{
+    border-radius: 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+
+padding: 20px;
+}
+
+
+.address-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 25px;
+    color: #4c4444;
+}
+
+.address-type {
+    font-size: 19px;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.menu-icon {
+    font-size: 22px;
+    cursor: pointer;
+    color: #555;
+    transition: transform 0.3s, color 0.3s;
+}
+
+.menu-icon:hover {
+    color: #007bff;
+}
+
+.menu-dropdown {
+    /* position: absolute; */
+    right: 10px;
+    top: 30px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 8px 0;
+    z-index: 10;
+    display: none; 
+}
+
+.menu-container:hover .menu-dropdown {
+    display: block; 
+}
+
+.menu-dropdown button {
+    display: block;
+    width: 100%;
+    padding: 8px 15px;
+    font-size: 16px;
+    color: #333;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.menu-dropdown button:hover {
+    background: #f4f4f4;
+}
+
+.address-item p {
+    margin: 8px 0;
+    font-size: 15px;
+    color: #2c2626;
+}
+
+.address-radio-btn{
+    height: 20px;
+    width: 20px;
+}
+
+
+.address-del-btn{
+    width: 200px;
+    height: 50px;
+    font-size: 18px;
+    font-weight: 600;
+    background-color: #ee6c2b;
+    color: white;
+    border: none;
+    text-transform: uppercase;
+    border-radius: 20px;
+
+}
+
+.confirm-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.confirm-popup {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.popup-buttons {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 15px;
+}
+
+.confirm-btn {
+    background-color: #d9534f;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.delete-cancel-btn {
+    background-color: #5bc0de;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.confirm-btn:hover {
+    background-color: #c9302c;
+}
+
+.delete-cancel-btn:hover {
+    background-color: #31b0d5;
+}
+
+.address-details-section{
+    width: 500px;
+}
+/* .view-address-section{
+
+    margin: 20px auto;
+    padding: 20px;
+    max-width: 1200px;
+    border-radius: 12px;
+    background: linear-gradient(to bottom right, #f9f9f9, #e3efff);
+} */
+@media (max-width: 768px) {
+    .address-list {
+        max-width: 95%;
+        padding: 15px;
+    }
+
+    .address-header {
+        /* flex-direction: column; */
+        align-items: flex-start;
+    }
+
+    .menu-icon {
+        font-size: 20px;
+    }
+
+    .add-address-btn {
+        width: 20%;
+        padding: 10px;
+    }
+
+    .address-item {
+        padding: 12px;
+    }
+
+    .menu-dropdown {
+        right: auto;
+        left: 10px; 
+    }
+}
+
+@media (max-width: 480px) {
+    .address-list h2 {
+        font-size: 20px; 
+    }
+
+    .address-item p {
+        font-size: 15px; 
+    }
+
+    
+    .add-address-btn {
+        width: 200px;
+        padding: 10px;
+    }
+
+    .address-del-btn{
+        width: 170px;
+        height: 40px
+    
+    }
+}
+.manage-edit-menu-dropdown {
+    /* position: absolute;  */
+    top: 26px; 
+    right: 140px; 
+    background: #d5dbff; 
+    border: 1px solid #d5dbff;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    padding: 5px;                     
+    display: flex; 
+    flex-direction: column; 
+    z-index: 10;
+    height: 110px; 
+    width: 90px;
+    height: 100px;
+    } 
+
+    .manage-edit-menu-dropdown button { 
+        display: inline-block; 
+        width: 100px;
+        padding: 5px;
+        font-size: 14px; 
+        font-weight: bold;
+        color: #ffffff; 
+        border: none; 
+        border-radius: 6px; 
+        cursor: pointer;
+        transition: transform 0.3s,
+        background-color 0.3s; 
+        margin: 5px; 
+
+    } 
+    .manage-edit-menu-dropdown .manage-edit-btn {
+        background-color: #4450A2; 
+        border-radius: 4px; 
+        width: 70px;
+        height: 30px;
+    } 
+
+    .manage-edit-menu-dropdown .manage-delete-btn { 
+        background-color: #4450A2;
+        border-radius: 4px;
+        width: 70px; 
+        height: 30px;
+    } 

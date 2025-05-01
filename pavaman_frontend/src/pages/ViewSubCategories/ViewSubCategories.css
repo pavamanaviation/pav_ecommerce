@@ -1,0 +1,146 @@
+/* .subcategories-page {
+    padding: 20px;
+}
+
+.page-title {
+    margin-bottom: 20px;
+    color: #000;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    text-align: left;
+}
+
+.loading, .error-message, .no-data {
+    font-size: 16px;
+    text-align: center;
+    color: #888;
+}
+
+.subcategories-grid {
+    display: grid;
+    gap: 20px;
+    justify-content: center;
+    padding: 10px;
+}
+
+.subcategories-grid {
+    grid-template-columns: repeat(5, 1fr);
+}
+
+@media (max-width: 1440px) {
+    .subcategories-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 1200px) {
+    .subcategories-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .subcategories-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .subcategories-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .subcategories-grid {
+        grid-template-columns: repeat(1, 1fr);
+    }
+}
+
+.subcategory-card {
+    background: #D9D9D9;
+    border-radius: 15px;
+    padding: 24px 16.5px 28px;
+    text-align: center;
+    width: 296px;
+    height: 328px;
+}
+
+.subcategory-card:hover {
+    transform: scale(1.03);
+}
+
+.subcategory-image {
+    width: 263px;
+    height: 199px;
+    border-radius: 21px;
+    object-fit: cover;
+}
+
+.subcategory-name {
+    color: #000;
+    font-family: Inter;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.subcategory-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    justify-content: space-around;
+}
+
+.subcategory-actions div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    cursor: pointer;
+    gap: 5px;
+}
+
+.subcategory-actions img {
+    width: 24px;
+    height: 24px;
+}
+
+.edit-label, .delete-label {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.edit-label{
+    color: #4CAF50 !important;
+}
+
+.delete-label{
+    color: #E63946;
+}
+
+.add-subcategory-card {
+    width: 160px;
+    height: 150px;
+    border: 2px dashed #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 12px;
+    font-size: 40px;
+    font-weight: bold;
+    color: #888;
+    transition: all 0.3s;
+}
+
+.add-subcategory-card:hover {
+    border-color: #6A0DAD;
+    color: #6A0DAD;
+}
+
+.add-card-image{
+    margin: 40% auto;
+} */

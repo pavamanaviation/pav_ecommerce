@@ -1,0 +1,20 @@
+.customer-layout {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .nav-container {
+    padding: 0 !important;
+  }
+  
+  .sidebar-container {
+    width: 250px;
+    background: #f4f4f4;
+    height: 100vh;
+  }
+  
+  .content-container {
+    flex: 1;
+    padding: 20px;
+  }
+  

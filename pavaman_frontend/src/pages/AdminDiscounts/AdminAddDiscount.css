@@ -1,0 +1,87 @@
+/* AdminAddDiscount.css */
+
+.add-discount-container {
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .add-discount-heading {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 25px;
+    text-align: center;
+    color: #4450A2;
+  }
+  
+  .discount-form-group {
+    margin-bottom: 20px;
+    display: flex;
+  }
+  
+  .discount-form-group-label {
+    display: block;
+    font-size: 20px;
+    margin-bottom: 8px;
+    color: #4450A2;
+    width: 300px;
+    text-align: left;
+    font-weight: 600;
+  }
+  
+  .discount-form-group-input {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 15px;
+    border: 1px solid grey;
+    border-radius: 20px;
+    transition: border-color 0.3s;
+  }
+
+  .discount-form-group-input:focus {
+    border: 1px solid grey;
+    outline: none;
+
+  }
+  
+  .discount-button-group {
+    display: flex;
+    justify-content:space-around;
+    margin-top: 30px;
+  }
+  
+
+  
+  .subcategory-table-container {
+    margin: 20px 0;
+  }
+  
+  .subcategory-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .subcategory-table th,
+  .subcategory-table td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .no-subcategory-message {
+    color: #777;
+    margin: 10px 0;
+  }
+  
+
+  .discount-table-group-label {
+    font-size: 18px;
+    margin-bottom: 8px;
+    color: #4450A2;
+    /* width: 300px; */
+    text-align: left;
+    font-weight: 600;
+  }

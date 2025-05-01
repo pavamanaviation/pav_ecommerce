@@ -1,0 +1,150 @@
+.sidemenu {
+  display: flex;
+   /* width: 179px;  */
+  width: 250px;  
+  padding: 44px 40px 79px 39px;
+  /* padding: 20px; */
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 30px;
+
+  transition: width 0.3s ease-in-out; 
+
+}
+
+.sidemenu-item {
+  height: 27px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  margin-top: 10px;
+}
+
+
+.sidemenu-label {
+  color: #4F4892;
+  font-family: Inter;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* App.css */
+
+.main-layout {
+  display: flex;
+  /* height: 100vh; */
+}
+
+.side-menu-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  /* border-right: 2px solid #4450A2; */
+  width: 250px;
+
+  transition: width 0.3s ease-in-out;
+  margin-left: 30px;
+  height: 100vh;
+
+
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.sidemenu {
+  width: 100%;
+  padding: 15px;
+  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
+  margin-top: 10px;
+}
+
+.line {
+  width: 1px;
+  background-color: #4450A2;
+  border: 1px #4450A2 solid
+}
+
+
+.sidemenu-item.logout-link {
+  font-size: 28px;
+  border: none;
+  background: none;
+  padding: none;
+  color: #4F4892;
+}
+.sidemenu-item img {
+  width: 24px;  /* Adjust size as needed */
+  height: 24px;
+  object-fit: contain;
+  color: #4F4892;
+  
+  
+}
+
+.sidemenu-img{
+  color: #4F4892;
+  font-size: 24px;
+}
+.toggle-button {
+  display: none; /* Default: Hide on desktop */
+}
+
+@media (max-width: 1024px) {
+  .side-menu-container {
+    width: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .side-menu-container {
+    width: 80px; /* Shrinks sidebar */
+    overflow: hidden;
+  }
+
+  .sidemenu-label {
+    display: none; /* Hide text, keep icons */
+  }
+
+  .sidemenu {
+    width: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .side-menu-container {
+    width: 60px;
+  }
+
+  .sidemenu-item {
+    justify-content: center;
+  }
+}
+/* Hide toggle button on larger screens */
+.toggle-button {
+  display: none;
+}
+
+/* Show toggle button only on mobile */
+@media screen and (max-width: 768px) {
+  .toggle-button {
+      display: flex;
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 24px;
+      cursor: pointer;
+  }
+}
+
+/* Move dashboard slightly up */
+.dashboard {
+  margin-top: 10px; /* Adjust as needed */
+}

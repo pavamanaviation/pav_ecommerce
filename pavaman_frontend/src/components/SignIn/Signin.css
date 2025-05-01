@@ -1,0 +1,477 @@
+/* .text {
+    position: absolute;
+    top: 225px;
+    left: 282px;
+    font-size: 12px;
+}
+.microsoftteams-image-67-1-icon {
+    position: absolute;
+    top: 39px;
+    left: 64px;
+    width: 218px;
+    height: 62px;
+    object-fit: cover;
+}
+.sign-in {
+    position: absolute;
+    top: 172px;
+    left: 68px;
+    font-size: 36px;
+}
+.confidence {
+    color: #ef7f1b;
+}
+.power-on-with-container {
+    position: absolute;
+    top: 123px;
+    left: 65px;
+}
+.image-3-icon {
+    position: absolute;
+    top: 215px;
+    left: 45px;
+    border-radius: 20px;
+    width: 545px;
+    height: 458px;
+    object-fit: cover;
+}
+.power-on-with-confidence-parent {
+    position: absolute;
+    top: 0px;
+    left: 636px;
+    background-color: #c3ddf0;
+    width: 635px;
+    height: 812px;
+    overflow: hidden;
+    font-size: 36px;
+}
+.fill-the-fields {
+    position: absolute;
+    top: 221px;
+    left: 68px;
+    font-weight: 300;
+    color: #353535;
+}
+.johnsnowemailcom {
+    position: absolute;
+    top: 0px;
+    font-weight: 300;
+
+    border: none;
+    width: 100%;
+    height: 100%;
+
+}
+.johnsnowemailcom-wrapper {
+    position: absolute;
+    top: 308px;
+    left: 68px;
+    border-radius: 5px;
+    border: 1px solid #b8b7b7;
+    box-sizing: border-box;
+    width: 446px;
+    height: 39px;
+    overflow: hidden;
+    color: #858585;
+}
+.vector-icon {
+    position: absolute;
+    height: 38.46%;
+    width: 4.93%;
+    top: 30.77%;
+    right: 3.14%;
+    bottom: 30.77%;
+    left: 91.93%;
+    max-width: 100%;
+    overflow: hidden;
+    max-height: 100%;
+}
+.write-your-password-parent {
+    position: absolute;
+    top: 386px;
+    left: 68px;
+    border-radius: 5px;
+    border: 1px solid #b8b7b7;
+    box-sizing: border-box;
+    width: 446px;
+    height: 39px;
+    overflow: hidden;
+    color: #858585;
+}
+.sign-in1 {
+    position: absolute;
+    top: 10px;
+    left: 196px;
+}
+.sign-in-wrapper {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    border-radius: 5px;
+    background-color: #0071e3;
+    width: 446px;
+    height: 39px;
+    overflow: hidden;
+}
+.frame-wrapper {
+    position: absolute;
+    top: 484px;
+    left: 68px;
+    width: 446px;
+    height: 39px;
+    color: #fff;
+}
+.group-icon {
+    position: absolute;
+    height: 1.48%;
+    top: 53.45%;
+    right: 93.71%;
+    left: 5.35%;
+    overflow: hidden;
+    width: 92%;
+    height: 50%;
+    margin-top: -191px;
+}
+.log-in-with {
+    position: absolute;
+    top: 11px;
+    left: 168px;
+}
+.flat-color-iconsgoogle {
+    position: absolute;
+    top: 8px;
+    left: 134px;
+    width: 24px;
+    height: 24px;
+    overflow: hidden;
+}
+.log-in-with-google-parent {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    border-radius: 5px;
+    background-color: #858585;
+    width: 446px;
+    height: 39px;
+    overflow: hidden;
+}
+.frame-container {
+    position: absolute;
+    top: 602px;
+    left: 68px;
+    width: 446px;
+    height: 39px;
+    color: #fff;
+}
+.email {
+    position: absolute;
+    top: 279px;
+    left: 68px;
+    font-weight: 300;
+    width: 95%;
+}
+.password {
+    position: absolute;
+    top: 357px;
+    left: 68px;
+    font-weight: 300;
+}
+.or {
+    position: absolute;
+    top: 0px;
+    left: 210px;
+}
+.group-child {
+    position: absolute;
+    top: 9.5px;
+    left: -0.5px;
+    border-top: 1px solid #858585;
+    box-sizing: border-box;
+    width: 197px;
+    height: 1px;
+}
+.group-item {
+    position: absolute;
+    top: 9.5px;
+    left: 249.5px;
+    border-top: 1px solid #858585;
+    box-sizing: border-box;
+    width: 197px;
+    height: 1px;
+}
+.or-parent {
+    position: absolute;
+    top: 553px;
+    left: 68px;
+    width: 446px;
+    height: 19px;
+    color: #858585;
+}
+.remember-for-30 {
+    position: absolute;
+    top: 434px;
+    left: 87px;
+    font-size: 12px;
+    color: #858585;
+}
+.forgot-password {
+    position: absolute;
+    top: 433px;
+    left: 412px;
+    font-size: 12px;
+    color: #fe6262;
+}
+.text-parent {
+    position: absolute;
+    top: calc(50% - 406px);
+    left: calc(50% - 635px);
+    box-shadow: -6px 12px 52.1px rgba(0, 0, 0, 0.25) inset;
+    border-radius: 20px;
+    background-color: #f6f6f6;
+    width: 1271px;
+    height: 812px;
+    overflow: hidden;
+}
+.desktop-1 {
+    width: 100%;
+    position: relative;
+    background-color: #fff;
+    height: 1024px;
+    overflow: hidden;
+    text-align: left;
+    font-size: 16px;
+    color: #000;
+    font-family: Inter;
+}
+
+.logo{
+    color: purple;
+}
+
+.message-box{
+    color: red;
+    margin-left: 74px;
+    margin-top: 20px;
+} */
+
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    height: 100vh;
+    max-height: 750px;
+    width: min(90%, 1440px);
+    margin: 50px auto;
+    border-radius: 20px;
+    background: #F6F6F6;
+    box-shadow: -6px 12px 52.1px 0px rgba(0, 0, 0, 0.25) inset;
+}
+
+.login-logo {
+    height: 100%;
+    max-width: 330px;
+    margin-top: 50px;
+}
+
+.login-form-section {
+    width: 50%;
+}
+
+.login-image-section {
+    width: 50%;
+    background: #C3DDF0;
+    border-radius: 0 20px 20px 0;
+}
+
+.login-image {
+    margin-top: 50px;
+    border-radius: 20px;
+    object-fit: cover;
+    max-width: 500px;
+    max-height: 473px;
+}
+
+.login-form-fields {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+.login-input-field {
+    width: 80%;
+    border-radius: 20px;
+    border: 1px solid #D9D9D9;
+    height: 50px;
+    margin-top: 8px;
+}
+
+.login-text {
+    font-size: 32px;
+    font-weight: 600;
+    color: #4450A2;
+    margin-top: 70px;
+}
+
+.login-btn {
+    border: none;
+    width: 180px;
+    height: 54px;
+    border-radius: 20px;
+    background: #4450A2;
+    margin-top: 20px;
+}
+
+
+.login-form-section {
+    text-align: left;
+    padding-left: 65px;
+}
+
+.login-btn-text {
+    font-size: 24px;
+    font-weight: 600;
+    color: #fff;
+    margin: auto
+}
+
+.login-form-info {
+    font-size: 16px;
+    color: #785454;
+    margin-top: 8px;
+}
+
+.email-label,
+.password-label {
+    font-size: 26px;
+    font-weight: 600;
+    color: #4450A2;
+}
+
+.image-text {
+    margin-top: 50px;
+    font-size: 32px;
+    font-weight: 600;
+}
+
+.image-text span {
+    color: #EF7F1B;
+}
+
+.password-input-wrapper {
+    position: relative;
+    width: 80%;
+}
+
+.password-input {
+    width: 100%;
+    padding-right: 40px;
+    border-radius: 20px;
+    border: 1px solid #D9D9D9;
+    height: 50px;
+    padding-left: 10px;
+    font-size: 16px;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 20px;
+    color: #555;
+}
+
+.popup-message {
+    padding: 12px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    width: 50%;
+  }
+  
+  .popup-message.success {
+    background-color: #3c943f;
+    color: white;
+  }
+  
+  .popup-message.error {
+    background-color: #da644a;
+    color: white;
+  }
+  
+  @keyframes fadeInOut {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -10px);
+    }
+    10% {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+    90% {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(-50%, -10px);
+    }
+  }
+  
+  .otp-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+  }
+
+  .otp-popup-content {
+    background: white;
+    padding: 20px;
+    border-radius: 20px;
+    width: 300px;
+    text-align: center;
+  }
+
+  .otp-popup-heading{
+    font-size: 22px;
+    font-weight: 600;
+    color: #4450A2;
+  }
+
+  .otp-popup-input-field{
+    margin: 10px auto;
+    border-radius: 20px;
+
+  }
+  .otp-popup-input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid grey;
+    border-radius: 20px;
+  }
+
+  .otp-verify-btn {
+    padding: 8px 16px;
+    background-color: #4450A2;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    width: 100px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .sign-in-popup{
+    width: 90%;
+  }
+  

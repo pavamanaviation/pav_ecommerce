@@ -1,0 +1,170 @@
+/* .all-products-container {
+    display: flex;
+  }
+  
+  .all-products-section {
+    flex: 1;
+    padding: 0 20px;
+  }
+  
+  .all-products-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  
+  .all-product-item {
+    width: 200px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+  }
+  
+  .all-product-image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+  }
+  
+  .all-product-name {
+    font-weight: bold;
+  }
+  
+  .all-product-price {
+    color: green;
+  }
+  
+  .all-product-availability {
+    font-size: 14px;
+    color: #555;
+  }
+  
+  .all-add-to-cart-btn {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .all-add-to-cart-btn:disabled {
+    background-color: gray;
+    cursor: not-allowed;
+  }
+  
+  .all-price-range {
+    margin-bottom: 15px;
+    font-weight: 500;
+  }
+   */
+
+   .all-products-container {
+    display: flex;
+    /* padding: 20px; */
+    background-color: #f9f9f9;
+    min-height: 100vh;
+  }
+  
+  .all-products-section {
+    flex: 1;
+    padding: 5px;
+  }
+  
+  .all-products-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Mobile default: 2 columns */
+    gap: 20px;
+  }
+ 
+  
+  
+  .all-product-item {
+    background-color: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    max-height: 180px;
+  }
+  
+  .all-product-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+  }
+  
+  .all-product-image {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+  }
+  
+  .all-product-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+    color: #4450A2;
+  }
+  
+  .all-product-price {
+    font-size: 12px;
+    font-weight: 600;
+    margin: 0;
+
+  }
+  
+  .all-product-availability {
+    font-size: 12px;
+    color: #888;
+    margin: 0;
+
+  }
+
+  .all-product-availability .availability.in-stock,
+  .all-product-availability .availability.out-of-stock,
+  .all-product-availability .availability.few-left{
+    font-size: 12px;
+
+  }
+  
+  .all-add-to-cart-btn {
+    margin-top: 12px;
+    padding: 8px 12px;
+    background-color: #ff3f6c;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  
+  .all-add-to-cart-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  .all-price-range {
+    font-weight: 500;
+    margin-bottom: 15px;
+  }
+  
+
+   
+  /* Tablets: ≥768px — 3 columns */
+  @media (min-width: 768px) {
+    .all-products-list {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  
+  /* Larger Tablets & Desktops: ≥1024px — 4 columns */
+  @media (min-width: 1024px) {
+    .all-products-list {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }

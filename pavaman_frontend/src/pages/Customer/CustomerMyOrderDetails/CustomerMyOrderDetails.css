@@ -1,0 +1,176 @@
+.order-box {
+  width: 700px;
+  margin: auto;
+  padding: 20px;
+  background-color: #dbe0f9;
+  text-align: start;
+}
+
+/* Headings */
+.main-heading {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #333;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 8px;
+}
+
+.other-items-heading {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 30px 0 10px;
+  color: #4450A2;
+  font-weight: bold;
+  text-align: start;
+}
+
+/* Product Cards */
+.custom-product-card {
+  display: flex;
+  align-items: flex-start;
+  background: #ffffff;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+  gap: 15px;
+}
+
+.custom-product-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.custom-product-info {
+  flex: 1;
+}
+
+.custom-product-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #222;
+  text-transform: capitalize;
+}
+
+.custom-arrow-button {
+  font-size: 22px;
+  color: #4450A2;
+  cursor: pointer;
+  padding-left: 10px;
+  display: flex;
+  align-items: center;
+}
+
+/* Highlighted Product */
+.highlight-product {
+  border: 1px solid #aaa;
+  background-color: #fafafa;
+}
+
+/* Shipping Address */
+.shipping-address-box {
+  background: #ffffff;
+  padding: 15px;
+  border-radius: 8px;
+  margin: 20px 0;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+}
+
+.shipping-address-box h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #4450A2;
+}
+
+.shipping-address-box p {
+  margin: 3px 0;
+  font-size: 14px;
+  color: #555;
+}
+.invoice-icon {
+  /* margin-left: 8px;  */
+  font-size: 20px;
+}
+.payment-details-heading{
+  text-transform: capitalize;
+}
+/* Payment Box */
+.payment-box {
+  background: #ffffff;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 20px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+}
+
+.payment-box h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #4450A2;
+}
+
+.payment-box p {
+  font-size: 14px;
+  margin: 5px 0;
+  color: #444;
+}
+
+/* Invoice Button */
+.invoice-button-wrapper {
+  text-align: start;
+  margin-top: 10px;
+}
+
+.invoice-button {
+  background-color: #4450A2;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  font-size: 15px;
+  font-weight:bold ;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.invoice-button:hover {
+  background-color: #4450A2;
+}
+
+/* Loader & Empty State */
+.order-loader {
+  text-align: center;
+  font-size: 16px;
+  color: #888;
+  padding: 40px;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+  .custom-product-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .custom-product-image {
+    width: 100%;
+    height: auto;
+  }
+
+  .custom-arrow-button {
+    align-self: flex-end;
+    padding-top: 10px;
+  }
+}
+
+@media screen and (max-width: 425px) {
+.main-heading {
+  font-size: 18px;
+}
+.order-box {
+  width: 320px;
+}
+}

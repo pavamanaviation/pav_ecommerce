@@ -1,0 +1,13 @@
+.price-filter-slider {
+    margin: 20px 0;
+}
+
+.price-label {
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.price-range-values {
+    font-weight: bold;
+    margin-top: 5px;
+}

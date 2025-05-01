@@ -1,0 +1,329 @@
+.customer-profile-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+    /* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
+    background-color: #d5dbff;
+    border-radius: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.customer-profile-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+
+.customer-avatar-section {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 20px;
+  }
+  
+  .customer-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 20px;
+    border: 2px solid #dee2e6;
+    transition: transform 0.3s;
+  }
+  .customer-avatar:hover {
+    transform: scale(1.05);
+  }
+  
+  .customer-avatar-name {
+    font-size: 22px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+
+.customer-profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+.profile-edit-heading {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin: 10px 0 5px;
+    text-align: start;
+}
+.profile-edit-main-heading {
+    font-size: 24px;
+    font-weight: bold;
+    color: #4450A2;
+    margin: 10px 0 5px;
+}
+
+.customer-edit-link {
+    font-size: 20px;
+    color: #4450A2;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.customer-edit-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+.customer-input-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.customer-input-single {
+    margin-bottom: 20px;
+}
+
+.customer-input-row-profile {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 17px;
+    background-color: #f5f5f5;
+    color: #333;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.customer-input-row-profile:read-only {
+    background-color: #f5f5f5;
+    border-color: #ddd;
+    color: #413d3d;
+    border-radius: 20px;
+}
+
+.customer-error {
+    background-color: #ffe0e0;
+    color: #d8000c;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #d8000c;
+    text-align: center;
+    font-weight: 500;
+}
+
+.customer-not-logged-in-box {
+    background-color: #fff3cd;
+    color: #856404;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #ffeeba;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.loading-box {
+    text-align: center;
+    font-size: 18px;
+    padding: 30px;
+    color: #555;
+}
+
+/* Popup styling */
+.popup-message {
+    text-align: center;
+    margin-bottom: 15px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    animation: fadeInOut 3s ease-in-out forwards;
+}
+
+.popup-message.error {
+    background-color: #ffdddd;
+    color: #d8000c;
+    border: 1px solid #d8000c;
+}
+
+.popup-message.success {
+    background-color: #ddffdd;
+    color: #270;
+    border: 1px solid #270;
+}
+
+
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translateY(-10px); }
+    10% { opacity: 1; transform: translateY(0); }
+    90% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .customer-input-row {
+        flex-direction: column;
+    }
+
+    .customer-input-row-profile {
+        width: 100%;
+    }
+
+    .customer-profile-container {
+        margin: 15px;
+        padding: 15px;
+    }
+
+    .profile-edit-main-heading {
+        font-size: 16px;
+    }
+
+    .customer-edit-link {
+        font-size: 13px;
+    }
+}
+@media (max-width: 768px) {
+    .customer-input-row {
+        flex-direction: column;
+    }
+
+    .customer-input-row-profile {
+        width: 100%;
+    }
+
+    .customer-profile-container {
+        margin: 20px;
+        padding: 20px;
+    }
+
+    .profile-edit-main-heading {
+        font-size: 18px;
+    }
+
+    .customer-edit-link {
+        font-size: 16px;
+    }
+}
+
+/* Popup Common Styles */
+.edit-popup-box {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 400px;
+    background: #ffffff;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    animation: popupFadeIn 0.3s ease;
+}
+
+/* Fade In Animation */
+@keyframes popupFadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -40%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+.edit-popup-box{
+    /* background-color: #d5dbff; */
+    border-radius: 20px;
+    border: 15px solid #d5dbff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+/* Popup Inputs */
+.edit-popup-box .edit-input {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    outline: none;
+    transition: 0.3s;
+
+}
+
+.edit-name-fields{
+    display: flex
+    ;
+        align-items: center;
+        gap: 10px;
+}
+.edit-popup-box .edit-input:focus {
+    border-color: #007bff;
+}
+
+/* Popup Buttons */
+.send-otp-btn,
+.verify-otp-btn {
+    padding: 12px;
+    font-size: 1rem;
+    background-color: #4450A2;
+    color: #ffffff;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    width: 150px;
+    margin: 0px auto;
+}
+
+.send-otp-btn:hover,
+.verify-otp-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Close Icon */
+.close-popup {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    font-size: 1.5rem;
+    padding: 5px;
+    color: #999;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.close-popup:hover {
+    color: #333;
+}
+
+/* Popup on Mobile */
+@media (max-width: 480px) {
+    .edit-popup-box {
+        padding: 1.5rem;
+        max-width: 90%;
+    }
+
+    .send-otp-btn,
+    .verify-otp-btn {
+        font-size: 0.95rem;
+        padding: 10px;
+    }
+
+    .edit-popup-box .edit-input {
+        font-size: 0.95rem;
+        padding: 8px 12px;
+    }
+}

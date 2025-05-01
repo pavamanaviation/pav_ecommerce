@@ -1,0 +1,186 @@
+.edit-address {
+    margin:  auto;
+    padding: 20px;
+    bottom: 20px;
+    max-width: 650px;
+    border-radius: 20px;
+    background: linear-gradient(to bottom right, #f2f3f9, #d5dbff);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+    transition: all 0.3s ease-in-out;
+}
+
+
+.form-title {
+    color: #4F4892;
+    font-size: 32px;
+    font-weight: bold;
+    line-height: normal;
+    margin-bottom: 35px;
+    margin-top: -9px; /* Move the heading upwards */
+}
+
+/* Form Grid Layout */
+.form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* Form Row */
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+
+/* Input Group */
+.input-group {
+    flex: 1;
+    position: relative;
+    width: 100%;
+    min-width: 200px;
+    overflow: visible;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: #f9f9f9;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.input-group input:focus {
+    border-color: #2874f0;
+    box-shadow: 0 0 8px rgba(40, 116, 240, 0.4);
+    outline: none;
+}
+
+.input-group label {
+    position: absolute;
+    top: 50%;
+    left: 15px;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: #777;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.input-group input:focus + label,
+.input-group input:not(:placeholder-shown) + label {
+    top: -10px;
+    font-size: 15px;
+    color: #4450A2;
+    font-weight: bold;
+}
+
+/* Address Type */
+.address-type-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 8px;
+}
+
+.address-type-options {
+    display: flex;
+    gap: 20px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.radio-option input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #636161;
+    border-radius: 50%;
+    appearance: none;
+    cursor: pointer;
+    transition: border-color 0.3s, background-color 0.3s;
+}
+
+.radio-option input[type="radio"]:checked {
+    background-color: #4450A2;
+    border-color: #4450A2;
+}
+
+.radio-option label {
+    font-size: 14px;
+    color: #333333;
+}
+.address-type{
+    color: #4450A2;
+}
+/* label {
+
+    color: #4450A2;
+    font-weight: bold;
+} */
+.Address-type{
+    display: inherit; 
+}
+
+/* Buttons */
+.button-container {
+    display: flex;
+    gap: 15px;
+    justify-content: space-between;
+}
+
+.input-group {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: white;
+}
+
+.input-text-field{
+    border-radius: 20px !important;
+}
+/* 🔹 Responsive Design */
+@media (max-width: 1024px) {
+    .form-row {
+        flex-direction: column; /* Stack inputs on smaller screens */
+        gap: 28px;
+    }
+
+    .input-group {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .edit-address {
+        padding: 15px;
+        max-width: 90%;
+    }
+
+    .button-container {
+        flex-direction: column;
+    }
+
+    button {
+        width: 100%;
+    }
+    .edit-address {
+        margin:  auto;
+        padding: 1px;
+        max-width: 660px;
+        border-radius: 20px;
+        background: linear-gradient(to bottom right, #f2f3f9, #d5dbff);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+        transition: all 0.3s ease-in-out;
+    }
+}
+
+
