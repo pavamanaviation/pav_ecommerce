@@ -45,7 +45,7 @@ class ProductsDetails(models.Model):
     product_name = models.CharField(max_length=200)
     sku_number = models.CharField(max_length=100, unique=True)
     price = models.FloatField()
-    quantity = models.IntegerField(default=0)
+    quantity = models.IntegerField(default=0) 
     discount = models.FloatField(default=0.0)
     material_file = models.CharField(max_length=255, blank=True, null=True)
     description = models.TextField()

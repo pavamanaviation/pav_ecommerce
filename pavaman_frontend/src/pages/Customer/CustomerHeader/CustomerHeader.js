@@ -445,8 +445,8 @@ const CustomerHeader = (onSearch) => {
 <li>
   <div className="customer-info">
     <span className="customer-name">Hello {customer.first_name}</span>
-    <span className="customer-email">{customer.email}</span>
-    <span className="customer-email">+91 {customer.mobile_no}</span>
+    {/* <span className="customer-email">{customer.email}</span>
+    <span className="customer-email"> {customer.mobile_no}</span> */}
 
   </div>
 </li>

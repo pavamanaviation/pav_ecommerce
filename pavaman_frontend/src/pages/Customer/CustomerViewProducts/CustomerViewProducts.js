@@ -43,8 +43,8 @@ const CustomerViewProducts = () => {
 
     useEffect(() => {
         fetchFilteredAndSortedProducts();
-      }, [sortOrder]);
-      
+    }, [sortOrder]);
+
     useEffect(() => {
         if (categoryName) {
             fetchProducts(categoryName); // Fetch initial products
@@ -200,11 +200,11 @@ const CustomerViewProducts = () => {
     const fetchFilteredAndSortedProducts = async () => {
         setLoading(true);
         setError(null);
-    
+
         const hasMin = values[0] !== '';
         const hasMax = values[1] !== '';
         const hasSort = sortOrder !== '';
-    
+
         let requestBody = {
             category_id: category_id,
             category_name: categoryName,
@@ -212,7 +212,7 @@ const CustomerViewProducts = () => {
             sub_category_name: subCategoryName,
             customer_id: customer_id
         };
-    
+
         // Include price range and sorting order if present
         if (hasMin && hasMax && hasSort) {
             requestBody = {
@@ -234,7 +234,7 @@ const CustomerViewProducts = () => {
                 sort_by: sortOrder
             };
         }
-    
+
         try {
             const response = await fetch('http://127.0.0.1:8000/filter-and-sort-products', {
                 method: 'POST',
@@ -243,9 +243,9 @@ const CustomerViewProducts = () => {
                 },
                 body: JSON.stringify(requestBody),
             });
-    
+
             const data = await response.json();
-    
+
             if (response.ok) {
                 setProducts(data.products);
             } else {
@@ -257,9 +257,9 @@ const CustomerViewProducts = () => {
             setLoading(false);
         }
     };
-    
-    
-      
+
+
+
     return (
         <div className="customer-dashboard container">
             < CarouselLanding />
@@ -299,19 +299,19 @@ const CustomerViewProducts = () => {
                 <div className="customer-products">
                     <div className="customer-products-heading">{subCategoryName} - Products</div>
                     <div className="popup-discount">
-                            {showPopup && (
-                                <PopupMessage
-                                    message={popupMessage.text}
-                                    type={popupMessage.type}
-                                    onClose={() => setShowPopup(false)}
-                                />
-                            )}
-                        </div>
+                        {showPopup && (
+                            <PopupMessage
+                                message={popupMessage.text}
+                                type={popupMessage.type}
+                                onClose={() => setShowPopup(false)}
+                            />
+                        )}
+                    </div>
                     <div className="product-filter-dashboard">
                         <div className="header-filter">
                             {/* Price Range Filter */}
                             <div className="filter-sort-section">
-                            <div className="filter-heading-products">Filters</div>
+                                <div className="filter-heading-products">Filters</div>
 
                                 <div className="price-slider-container">
                                     <label className="price-range-label">
@@ -374,7 +374,7 @@ const CustomerViewProducts = () => {
                                 </div>
                             </div>
                         </div>
-                      
+
 
                         <div className="customer-products-section">
 
@@ -389,8 +389,20 @@ const CustomerViewProducts = () => {
                                             src={product.product_image_url}
                                             alt={product.product_name}
                                             className="customer-product-image"
-                                            // onError={(e) => (e.target.src = defaultImage)}
+                                        // onError={(e) => (e.target.src = defaultImage)}
                                         />
+                                        {/* <img
+  src={
+    product.product_image_url
+      ? product.product_image_url
+      : product.product_images?.[0] ?? '/default-placeholder.png'
+  }
+  alt={product.product_name}
+  onError={(e) => {
+    e.target.src = '/default-placeholder.png';
+  }}
+/> */}
+
                                         <div className="customer-product-name">{product.product_name}</div>
                                         <div className="customer-discount-section-price">₹{product.final_price}.00 (incl. GST)</div>
                                         <div >

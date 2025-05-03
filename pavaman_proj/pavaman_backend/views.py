@@ -12,7 +12,7 @@ from django.contrib.sessions.models import Session
 import random 
 from .sms_utils import send_bulk_sms 
 from pavaman_backend.models import (CustomerRegisterDetails, PavamanAdminDetails, CategoryDetails,SubCategoryDetails,ProductsDetails,
-                                    PaymentDetails,OrderProducts,FeedbackRating)
+                                    PaymentDetails,OrderProducts,FeedbackRating,CustomerAddress)
 from openpyxl import Workbook
 from io import BytesIO
 from django.http import HttpResponse
@@ -1327,7 +1327,6 @@ def delete_subcategory(request):
     return JsonResponse({"error": "Invalid HTTP method. Only POST is allowed.", "status_code": 405}, status=405)
 
 
-
 @csrf_exempt
 def add_product(request):
     if request.method == 'POST':
@@ -1392,51 +1391,6 @@ def add_product(request):
             if ProductsDetails.objects.filter(sku_number=sku_number).exists():
                 return JsonResponse({"error": "SKU number already exists.", "status_code": 409}, status=409)
 
-            # product_images = []
-            # if 'product_images' not in request.FILES:
-            #     return JsonResponse({"error": "Product images are required.", "status_code": 400}, status=400)
-
-            # image_files = request.FILES.getlist('product_images')
-            # if not image_files:
-            #     return JsonResponse({"error": "At least one product image is required.", "status_code": 400}, status=400)
-
-            # product_folder = f"static/images/products/{product_name.replace(' ', '_')}"
-            # product_folder_path = os.path.join(settings.BASE_DIR, product_folder)
-            # os.makedirs(product_folder_path, exist_ok=True)
-
-            # allowed_image_extensions = ['png', 'jpg', 'jpeg']
-            # for image in image_files:
-            #     file_extension = image.name.split('.')[-1].lower()
-            #     if file_extension not in allowed_image_extensions:
-            #         return JsonResponse({"error": f"Invalid image file type. Allowed types: {', '.join(allowed_image_extensions)}", "status_code": 400}, status=400)
-
-            #     image_name = f"{sku_number}_{image.name}"
-            #     image_path = os.path.join(product_folder_path, image_name)
-
-            #     with open(image_path, 'wb') as f:
-            #         for chunk in image.chunks():
-            #             f.write(chunk)
-
-            #     product_images.append(f"{product_folder}/{image_name}")
-
-            # if 'material_file' not in request.FILES:
-            #     return JsonResponse({"error": "Material file is required.", "status_code": 400}, status=400)
-
-            # material_file = request.FILES['material_file']
-            # allowed_material_extensions = ['pdf', 'doc']
-            # file_extension = material_file.name.split('.')[-1].lower()
-
-            # if file_extension not in allowed_material_extensions:
-            #     return JsonResponse({"error": f"Invalid material file type. Allowed types: {', '.join(allowed_material_extensions)}", "status_code": 400}, status=400)
-
-            # material_file_name = f"{product_name.replace(' ', '_')}.{file_extension}"
-            # material_image_path = f'static/materials/{material_file_name}'
-            # material_image_full_path = os.path.join(settings.BASE_DIR, material_image_path)
-            # os.makedirs(os.path.dirname(material_image_full_path), exist_ok=True)
-
-            # with open(material_image_full_path, 'wb') as f:
-            #     for chunk in material_file.chunks():
-            #         f.write(chunk)
             if 'product_images' not in request.FILES:
                 return JsonResponse({"error": "Product images are required.", "status_code": 400}, status=400)
 
@@ -1534,6 +1488,11 @@ def add_product(request):
             return JsonResponse({"error": f"Unexpected error: {str(e)}", "status_code": 500}, status=500)
 
     return JsonResponse({"error": "Invalid request method. Only POST is allowed.", "status_code": 405}, status=405)
+
+
+
+
+
 
 
 
@@ -1705,7 +1664,7 @@ def view_products(request):
             products = ProductsDetails.objects.filter(
                 admin=admin, category=category, sub_category=sub_category
             ).values(
-                'id', 'product_name', 'sku_number', 'price', 'availability', 'quantity', 'cart_status','product_images','discount','description'
+                'id', 'product_name', 'sku_number', 'price', 'availability', 'quantity', 'cart_status','product_images','discount','gst','description'
             )
 
             product_list = []
@@ -1714,17 +1673,29 @@ def view_products(request):
                 if product['product_images']:
                     image_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{product['product_images'][0]}"
 
+                price = round(float(product['price']), 2)  # Round price to 2 decimals
+                discount = round(float(product.get('discount') or 0), 2)  # Round discount to 2 decimals
+                gst = round(float(product.get('gst') or 0), 2)  # Round GST to 2 decimals
+
+                discount_amount = round(price * (discount / 100), 2)  # Round discount amount to 2 decimals
+                final_price = round(price - discount_amount, 2)  # Round price after discount
+                # gst_amount = round(price_after_discount * (gst / 100), 2)  # Round GST amount
+                # final_price = round(price_after_discount + gst_amount, 2)  # Final price rounded to 2 decimals
+
+
                 product_list.append({
                     "product_id": str(product['id']),
                     "product_name": product['product_name'],
                     "sku_number": product['sku_number'],
-                    "price": product['price'],
+                    "price": f"{price:.2f}",
                     "availability": product['availability'],
                     "quantity": product['quantity'],
                     "cart_status":product['cart_status'],
                     "product_images": image_url,
+                    "gst": f"{int(gst)}%",
+                    "final_price": f"{final_price:.2f}",
                     # "product_images": product['product_images'][0] if product['product_images'] else None,
-                    "product_discount":product['discount'],
+                    "product_discount": f"{int(discount)}%",
                     "product_description":product['description']
                 })
 
@@ -1780,11 +1751,30 @@ def view_product_details(request):
                     image_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{image}"
                     image_urls.append(image_url)
 
+                    price = round(float(product.price), 2)
+                    discount = round(float(product.discount or 0))
+                    gst = round(float(product.gst or 0))
+
+
+                    discount_amount = round(price * (discount / 100), 2)
+                    final_price = round(price - discount_amount, 2)
+
+            # GST calculation
+                    # gst_amount = round(price_after_discount * (gst / 100), 2)
+                    # final_price = round(price_after_discount + gst_amount, 2)
+
+
             product_data = {
                 "product_id": str(product.id),
                 "product_name": product.product_name,
                 "sku_number": product.sku_number,
-                "price": product.price,
+                "price": f"{price:.2f}",
+                "discount": f"{discount}%",
+                "discount_amount": f"{discount_amount:.2f}",
+                "final_price": f"{final_price:.2f}",
+                "gst": f"{gst}%",
+                # "gst_amount": f"{gst_amount:.2f}",
+                # "final_price": f"{final_price:.2f}",
                 "availability": product.availability,
                 "quantity": product.quantity,
                 "description": product.description,
@@ -1815,239 +1805,6 @@ def view_product_details(request):
 
 
 
-# @csrf_exempt
-# def edit_product(request):
-#     if request.method == 'POST':
-#         try:
-#             # Check if request is JSON
-#             if request.content_type == "application/json":
-#                 try:
-#                     data = json.loads(request.body.decode('utf-8'))
-#                 except json.JSONDecodeError:
-#                     return JsonResponse({"error": "Invalid JSON format.", "status_code": 400}, status=400)
-#             else:
-#                 data = request.POST.dict()
-
-#             # Extract required fields
-#             admin_id = data.get('admin_id')
-#             category_id = data.get('category_id')
-#             sub_category_id = data.get('sub_category_id')
-#             product_id = data.get('product_id')
-#             product_name = data.get('product_name').lower()
-#             sku_number = data.get('sku_number')
-#             price = data.get('price')
-#             quantity = data.get('quantity')
-#             discount = data.get('discount', 0.0)
-#             description = data.get('description')
-
-#             # Ensure all required fields are present
-#             if not all([admin_id, category_id, sub_category_id, product_id, product_name, sku_number, price, quantity, description]):
-#                 return JsonResponse({"error": "Missing required fields.", "status_code": 400}, status=400)
-
-#             # Convert price, quantity, and discount to proper types
-#             try:
-#                 price = float(price)
-#                 quantity = int(quantity)
-#                 discount = float(discount)
-#             except ValueError:
-#                 return JsonResponse({"error": "Invalid format for price, quantity, or discount.", "status_code": 400}, status=400)
-
-#             # Validate discount: it should not be greater than the price
-#             if discount > price:
-#                 return JsonResponse({"error": "Discount cannot be greater than the price.", "status_code": 400}, status=400)
-
-#             # Determine product availability
-#             availability = "In Stock" if quantity > 10 else "Very Few Products Left" if quantity > 0 else "Out of Stock"
-
-#             # Validate admin
-#             try:
-#                 admin = PavamanAdminDetails.objects.get(id=admin_id)
-#             except PavamanAdminDetails.DoesNotExist:
-#                 return JsonResponse({"error": "Admin not found.", "status_code": 401}, status=401)
-
-#             # Validate category
-#             try:
-#                 category = CategoryDetails.objects.get(id=category_id, admin=admin)
-#             except CategoryDetails.DoesNotExist:
-#                 return JsonResponse({"error": "Category not found.", "status_code": 404}, status=404)
-
-#             # Validate sub-category
-#             try:
-#                 sub_category = SubCategoryDetails.objects.get(id=sub_category_id, category=category)
-#             except SubCategoryDetails.DoesNotExist:
-#                 return JsonResponse({"error": "Subcategory not found.", "status_code": 404}, status=404)
-
-#             # Validate product
-#             try:
-#                 product = ProductsDetails.objects.get(id=product_id, category=category, sub_category=sub_category)
-#             except ProductsDetails.DoesNotExist:
-#                 return JsonResponse({"error": "Product not found.", "status_code": 404}, status=404)
-
-#             # Ensure SKU number is unique
-#             if ProductsDetails.objects.exclude(id=product_id).filter(sku_number=sku_number).exists():
-#                 return JsonResponse({"error": "SKU number already exists.", "status_code": 400}, status=400)
-
-#             # Ensure Product Name is unique
-#             if ProductsDetails.objects.exclude(id=product_id).filter(product_name=product_name).exists():
-#                 return JsonResponse({"error": "Product name already exists.", "status_code": 400}, status=400)
-
-#             # Update product details
-#             old_product_name = product.product_name
-#             product.product_name = product_name
-#             product.sku_number = sku_number
-#             product.price = price
-#             product.quantity = quantity
-#             product.discount = discount
-#             product.description = description
-#             product.availability = availability
-#             product.cart_status = False  # Ensure cart_status is always False when updating
-
-#             # Handle product images upload
-#             # product_images = []
-#             # if 'product_images' in request.FILES:
-#             #     image_files = request.FILES.getlist('product_images')
-
-#             #     old_product_folder = f"static/images/products/{old_product_name.replace(' ', '_')}"
-#             #     new_product_folder = f"static/images/products/{product_name.replace(' ', '_')}"
-
-#             #     new_product_folder_path = os.path.join(settings.BASE_DIR, new_product_folder)
-#             #     os.makedirs(new_product_folder_path, exist_ok=True)
-
-#             #     for image in image_files:
-#             #         allowed_extensions = ['png', 'jpg', 'jpeg']
-#             #         file_extension = image.name.split('.')[-1].lower()
-#             #         if file_extension not in allowed_extensions:
-#             #             return JsonResponse({"error": f"Invalid file type. Allowed types: {', '.join(allowed_extensions)}", "status_code": 400}, status=400)
-
-#             #         image_name = f"{sku_number}_{image.name}"
-#             #         image_path = os.path.join(new_product_folder_path, image_name)
-
-#             #         with open(image_path, 'wb') as f:
-#             #             for chunk in image.chunks():
-#             #                 f.write(chunk)
-
-#             #         product_images.append(f"{new_product_folder}/{image_name}")
-
-#             # product.product_images = product_images
-
-#             # # Handle material file upload
-#             # if 'material_file' in request.FILES:
-#             #     material_file = request.FILES['material_file']
-#             #     allowed_extensions = ['pdf', 'doc']
-#             #     file_extension = material_file.name.split('.')[-1].lower()
-
-#             #     if file_extension not in allowed_extensions:
-#             #         return JsonResponse({"error": f"Invalid material file type. Allowed types: {', '.join(allowed_extensions)}", "status_code": 400}, status=400)
-
-#             #     material_file_name = f"{product_name.replace(' ', '_')}.{file_extension}"
-#             #     material_image_path = f'static/materials/{material_file_name}'
-#             #     material_image_full_path = os.path.join(settings.BASE_DIR, material_image_path)
-#             #     os.makedirs(os.path.dirname(material_image_full_path), exist_ok=True)
-
-#             #     with open(material_image_full_path, 'wb') as f:
-#             #         for chunk in material_file.chunks():
-#             #             f.write(chunk)
-
-#             #     product.material_file = material_image_path
-
-#             # # Save the updated product details
-#             # product.save()
-#                         # Handle product images upload to S3
-#             product_images = []
-#             if 'product_images' in request.FILES:
-#                 image_files = request.FILES.getlist('product_images')
-
-#                 old_product_folder = f"static/images/products/{old_product_name.replace(' ', '_')}"
-#                 new_product_folder = f"static/images/products/{product_name.replace(' ', '_')}"
-
-#                 s3 = boto3.client(
-#                     's3',
-#                     aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-#                     aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-#                     region_name=settings.AWS_S3_REGION_NAME
-#                 )
-
-#                 # Upload new images to S3
-#                 for image in image_files:
-#                     allowed_extensions = ['png', 'jpg', 'jpeg']
-#                     file_extension = image.name.split('.')[-1].lower()
-#                     if file_extension not in allowed_extensions:
-#                         return JsonResponse({"error": f"Invalid file type. Allowed types: {', '.join(allowed_extensions)}", "status_code": 400}, status=400)
-
-#                     safe_image_name = f"{sku_number}_{image.name.replace(' ', '_').replace('/', '_')}"
-#                     s3_file_key = f"{new_product_folder}/{safe_image_name}"
-
-#                     try:
-#                         # Upload the image to S3
-#                         s3.upload_fileobj(
-#                             image,
-#                             settings.AWS_STORAGE_BUCKET_NAME,
-#                             s3_file_key,
-#                             ExtraArgs={'ContentType': image.content_type}
-#                         )
-
-#                         product_images.append(s3_file_key)
-#                     except Exception as e:
-#                         return JsonResponse({"error": f"Failed to upload image to S3: {str(e)}", "status_code": 500}, status=500)
-
-#                 # Delete old images from S3 (if any)
-#                 old_product_folder_path = f"static/images/products/{old_product_name.replace(' ', '_')}"
-#                 try:
-#                     s3.delete_objects(
-#                         Bucket=settings.AWS_STORAGE_BUCKET_NAME,
-#                         Delete={'Objects': [{'Key': key} for key in s3.list_objects_v2(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Prefix=old_product_folder_path).get('Contents', [])]}
-#                     )
-#                 except Exception as delete_err:
-#                     print("Warning: Could not delete old product images from S3:", str(delete_err))
-
-#             product.product_images = product_images
-
-#             # Handle material file upload to S3
-#             if 'material_file' in request.FILES:
-#                 material_file = request.FILES['material_file']
-#                 allowed_extensions = ['pdf', 'doc']
-#                 file_extension = material_file.name.split('.')[-1].lower()
-
-#                 if file_extension not in allowed_extensions:
-#                     return JsonResponse({"error": f"Invalid material file type. Allowed types: {', '.join(allowed_extensions)}", "status_code": 400}, status=400)
-
-#                 safe_material_name = f"{product_name.replace(' ', '_')}.{file_extension}"
-#                 s3_material_key = f"static/materials/{safe_material_name}"
-
-#                 try:
-#                     # Upload the material file to S3
-#                     s3.upload_fileobj(
-#                         material_file,
-#                         settings.AWS_STORAGE_BUCKET_NAME,
-#                         s3_material_key,
-#                         ExtraArgs={'ContentType': material_file.content_type}
-#                     )
-
-#                     product.material_file = s3_material_key
-#                 except Exception as e:
-#                     return JsonResponse({"error": f"Failed to upload material file to S3: {str(e)}", "status_code": 500}, status=500)
-
-#             # Save the updated product details
-#             product.save()
-
-#             return JsonResponse({
-#                 "message": "Product updated successfully.",
-#                 "category_id": str(product.category.id),
-#                 "category_name": product.category.category_name,
-#                 "subcategory_id": str(product.sub_category.id),
-#                 "sub_category_name": product.sub_category.sub_category_name,
-#                 "product_id": str(product.id),
-#                 "availability": availability,
-#                 "cart_status": product.cart_status,  # Always False after update
-#                 "status_code": 200
-#             }, status=200)
-
-#         except Exception as e:
-#             return JsonResponse({"error": f"Unexpected error: {str(e)}", "status_code": 500}, status=500)
-
-#     else:
-#         return JsonResponse({"error": "Invalid request method. Only POST is allowed.", "status_code": 405}, status=405)
-
 @csrf_exempt
 def edit_product(request):
     if request.method == 'POST':
@@ -2072,6 +1829,7 @@ def edit_product(request):
             quantity = data.get('quantity')
             discount = data.get('discount', 0.0)
             description = data.get('description')
+            gst = float(data.get('gst', 0.0))
 
             # Ensure all required fields are present
             if not all([admin_id, category_id, sub_category_id, product_id, product_name, sku_number, price, quantity, description]):
@@ -2135,56 +1893,7 @@ def edit_product(request):
             product.availability = availability
             product.cart_status = False  # Ensure cart_status is always False when updating
 
-            # Handle product images upload to S3
-            # product_images = []
-            # if 'product_images' in request.FILES:
-            #     image_files = request.FILES.getlist('product_images')
-
-            #     # Use old product name for the folder path
-            #     product_folder = f"static/images/products/{old_product_name.replace(' ', '_').replace('/', '_')}"
-
-            #     # Initialize S3 client
-            #     s3 = boto3.client(
-            #         's3',
-            #         aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-            #         aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-            #         region_name=settings.AWS_S3_REGION_NAME
-            #     )
-
-            #     # Delete old images from S3 (if they exist)
-            #     try:
-            #         response = s3.list_objects_v2(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Prefix=product_folder)
-            #         if 'Contents' in response:
-            #             objects_to_delete = [{'Key': obj['Key']} for obj in response['Contents']]
-            #             s3.delete_objects(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Delete={'Objects': objects_to_delete})
-            #     except Exception as delete_err:
-            #         print("Warning: Could not delete old product images from S3:", str(delete_err))
-
-            #     # Upload new images to S3 with the same folder name
-            #     for image in image_files:
-            #         allowed_extensions = ['png', 'jpg', 'jpeg']
-            #         file_extension = image.name.split('.')[-1].lower()
-            #         if file_extension not in allowed_extensions:
-            #             return JsonResponse({"error": f"Invalid file type. Allowed types: {', '.join(allowed_extensions)}", "status_code": 400}, status=400)
-
-            #         safe_image_name = f"{sku_number}_{image.name.replace(' ', '_').replace('/', '_')}"
-            #         s3_file_key = f"{product_folder}/{safe_image_name}"
-
-            #         try:
-            #             # Upload the image to S3, overwriting any existing files
-            #             s3.upload_fileobj(
-            #                 image,
-            #                 settings.AWS_STORAGE_BUCKET_NAME,
-            #                 s3_file_key,
-            #                 ExtraArgs={'ContentType': image.content_type}
-            #             )
-
-            #             product_images.append(s3_file_key)
-            #         except Exception as e:
-            #             return JsonResponse({"error": f"Failed to upload image to S3: {str(e)}", "status_code": 500}, status=500)
-
-            # product.product_images = product_images
-            # Handle product images upload to S3
+        
             product_images = []
             if 'product_images' in request.FILES:
                 image_files = request.FILES.getlist('product_images')
@@ -2264,7 +1973,11 @@ def edit_product(request):
                     product.material_file = s3_material_key
                 except Exception as e:
                     return JsonResponse({"error": f"Failed to upload material file to S3: {str(e)}", "status_code": 500}, status=500)
+            
 
+            final_price = price - (price * discount / 100)
+            # gst_amount = (discounted_price * gst) / 100
+            # final_price = discounted_price + gst_amount
             # Save the updated product details
             product.save()
 
@@ -2276,7 +1989,13 @@ def edit_product(request):
                 "sub_category_name": product.sub_category.sub_category_name,
                 "product_id": str(product.id),
                 "availability": availability,
-                "cart_status": product.cart_status,  # Always False after update
+                "cart_status": product.cart_status,
+                "price": round(price, 2),
+                "discount": round(discount, 2),
+                # "discounted_price": round(discounted_price, 2),
+                "gst": round(gst, 2),
+                # "gst_amount": round(gst_amount, 2),
+                "final_price": round(final_price , 2),
                 "status_code": 200
             }, status=200)
 
@@ -2649,13 +2368,27 @@ def discount_products(request):
                     f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{product.material_file}"
                     if product.material_file else ""
                 )
+
+                price = float(product.price or 0)
+                discount = float(product.discount or 0)
+                gst = float(product.gst or 0)
+
+                
+                discounted_price = round(price - discount, 2)
+                final_price = round((discount / price) * 100, 2) if price > 0 else 0
+                # gst_amount = round((discounted_price * gst) / 100, 2)
+                # final_price = round(discounted_price + gst_amount, 2)
+
+
                 product_list.append({
                     "product_id": str(product.id),
                     "product_name": product.product_name,
                     "sku_number": product.sku_number,
-                    "price": float(product.price),
-                    "discount": float(product.discount),
-                    "final_price": float(product.price) - float(product.discount),
+                    "price": round(price, 2),
+                    "gst": f"{round(gst, 2)}%",
+                    "discount_amount": round(discounted_price, 2),
+                    "discount": f"{round(discount, 2)}%",
+                    "final_price":round(final_price, 2),
                     "quantity": product.quantity,
                     "material_file": material_file_url,
                     "description": product.description,
@@ -2686,6 +2419,93 @@ def discount_products(request):
 
     return JsonResponse({"error": "Invalid HTTP method. Only POST is allowed.", "status_code": 405}, status=405)
 
+
+
+# @csrf_exempt
+# def download_discount_products_excel(request):
+#     if request.method == 'POST':
+#         try:
+#             data = json.loads(request.body)
+#             admin_id = data.get('admin_id')
+
+#             if not admin_id:
+#                 return JsonResponse({"error": "Admin ID is required.", "status_code": 400}, status=400)
+
+#             products = ProductsDetails.objects.filter(admin_id=admin_id)
+
+#             if not products.exists():
+#                 return JsonResponse({
+#                     "message": "No products with discount found.",
+#                     "status_code": 200,
+#                     "admin_id": str(admin_id)
+#                 }, status=200)
+
+#             # Create Excel workbook
+#             wb = Workbook()
+#             ws = wb.active
+#             ws.title = "Products Details"
+
+#             # Define headers
+#             headers = [
+#                 "Product ID", "Product Name", "SKU Number", "Price", "Discount", "Final Price",
+#                 "Quantity", "Material File", "Description", "Specifications Count", "Specifications",
+#                 "Availability", "Product Status", "Cart Status",
+#                 "Category", "Subcategory", "Category ID", "Subcategory ID", "Created At"
+#             ]
+#             ws.append(headers)
+
+#             # Populate data
+#             for product in products:
+#                 final_price = float(product.price) - float(product.discount)
+#                  # Generate the S3 URL for material file
+#                 material_file_url = (
+#                     f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{product.material_file}"
+#                     if product.material_file else ""
+#                 )
+
+#                 ws.append([
+#                     str(product.id),
+#                     product.product_name,
+#                     product.sku_number,
+#                     float(product.price),
+#                     float(product.discount),
+#                     final_price,
+#                     product.quantity,
+#                     material_file_url,
+#                     product.description,
+#                     product.number_of_specifications,
+#                     json.dumps(product.specifications) if isinstance(product.specifications, dict) else product.specifications,
+#                     product.availability,
+#                     product.product_status,
+#                     product.cart_status,
+#                     product.category.category_name if product.category else '',
+#                     product.sub_category.sub_category_name if product.sub_category else '',
+#                     product.category_id,
+#                     product.sub_category_id,
+#                     product.created_at.strftime('%Y-%m-%d %H:%M:%S') if product.created_at else ''
+#                 ])
+
+#             # Save to buffer
+#             buffer = BytesIO()
+#             wb.save(buffer)
+#             buffer.seek(0)
+
+#             # Return Excel as response
+#             response = HttpResponse(
+#                 buffer,
+#                 content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+#             )
+#             response['Content-Disposition'] = 'attachment; filename=Products_Details.xlsx'
+#             return response
+
+#         except json.JSONDecodeError:
+#             return JsonResponse({"error": "Invalid JSON data.", "status_code": 400}, status=400)
+#         except Exception as e:
+#             return JsonResponse({"error": f"An unexpected error occurred: {str(e)}", "status_code": 500}, status=500)
+
+#     return JsonResponse({"error": "Invalid HTTP method. Only POST is allowed.", "status_code": 405}, status=405)
+
+
 @csrf_exempt
 def download_discount_products_excel(request):
     if request.method == 'POST':
@@ -2712,7 +2532,7 @@ def download_discount_products_excel(request):
 
             # Define headers
             headers = [
-                "Product ID", "Product Name", "SKU Number", "Price", "Discount", "Final Price",
+                "Product ID", "Product Name", "SKU Number", "Price", "Discount (%)", "GST (%)","GST Amount","Final Price",
                 "Quantity", "Material File", "Description", "Specifications Count", "Specifications",
                 "Availability", "Product Status", "Cart Status",
                 "Category", "Subcategory", "Category ID", "Subcategory ID", "Created At"
@@ -2721,7 +2541,13 @@ def download_discount_products_excel(request):
 
             # Populate data
             for product in products:
-                final_price = float(product.price) - float(product.discount)
+                price = float(product.price)
+                discount = float(product.discount)
+                gst = float(product.gst) if hasattr(product, 'gst') and product.gst else 0
+                final_price =  round((discount / price) * 100, 2) if price > 0 else 0
+                # gst_amount = (final_price * gst / 100)
+                # final_price = final_price + gst_amount  # Now includes GST
+
                  # Generate the S3 URL for material file
                 material_file_url = (
                     f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{product.material_file}"
@@ -2732,9 +2558,11 @@ def download_discount_products_excel(request):
                     str(product.id),
                     product.product_name,
                     product.sku_number,
-                    float(product.price),
-                    float(product.discount),
-                    final_price,
+                    round(price, 2),
+                    f"{round(discount)}%",
+                    f"{round(gst)}%",
+                    # round(gst_amount, 2),
+                    round(final_price, 2),
                     product.quantity,
                     material_file_url,
                     product.description,
@@ -2773,6 +2601,7 @@ def download_discount_products_excel(request):
             return JsonResponse({"error": f"An unexpected error occurred: {str(e)}", "status_code": 500}, status=500)
 
     return JsonResponse({"error": "Invalid HTTP method. Only POST is allowed.", "status_code": 405}, status=405)
+
 
 
 @csrf_exempt
@@ -2840,16 +2669,27 @@ def apply_discount_by_subcategory_only(request):
                 updated_products = []
 
                 for product in products:
-                    original_price = product.price
-                    final_price = original_price - (original_price * (discount / 100))
+                    price = float(product.price or 0)
+                    discount = float(product.discount or 0)
+                    gst = float(product.gst or 0)
+                    discount_amount = (price * discount / 100) if price > 0 else 0
+                    final_price = round(price - discount_amount, 2)
 
+
+                    # Directly check and apply the GST value (if exists)
+                    # gst = product.gst if product.gst else 0
+                    # gst_amount = (final_price * gst / 100)
+                    # final_price_with_gst = final_price + gst_amount
                     product.discount = discount
                     product.save(update_fields=['discount'])
 
                     updated_products.append({
                         "product_id": str(product.id),
                         "product_name": product.product_name,
-                        "price": float(original_price),
+                        "price": round(price, 2),
+                        "discount": f"{round(discount, 2)}%",  # Added discount with '%' symbol
+                        "gst": f"{round(gst, 2)}%",  # GST in percentage format
+                        # "gst_amount": round(gst_amount, 2),  # GST amount calculated
                         "final_price": round(final_price, 2)
                     })
 
@@ -3003,6 +2843,38 @@ def retrieve_feedback(request):
                 except CustomerRegisterDetails.DoesNotExist:
                     # If customer not found, skip or handle as needed
                     continue
+         
+            feedbacks = FeedbackRating.objects.filter(admin_id=admin_id)
+
+            if not feedbacks.exists():
+                return JsonResponse({"error": "No feedback found for this admin.", "status_code": 404}, status=404)
+            feedback_data = []
+            for feedback in feedbacks:
+                try:
+                    customer = CustomerRegisterDetails.objects.get(id=feedback.customer_id)
+                    product = ProductsDetails.objects.get(id=feedback.product_id)
+                    # Get first image from list (if available)
+                    image_url = None
+                    if product.product_images and isinstance(product.product_images, list):
+                        first_image = product.product_images[0]
+                        if first_image:
+                            image_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{first_image}"
+
+                    feedback_data.append({
+                        "customer_id": customer.id,
+                        "customer_name": f"{customer.first_name} {customer.last_name}",
+                        "customer_email": customer.email,
+                        "product_image":image_url,
+                        "product_name":product.product_name,
+                        "product_id": feedback.product.id,
+                        "rating": feedback.rating,
+                        "feedback": feedback.feedback,
+                        "order_id": feedback.order_id,
+                        "created_at": feedback.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                    })
+                except CustomerRegisterDetails.DoesNotExist:
+                    # If customer not found, skip or handle as needed
+                    continue
 
             return JsonResponse({
                 "feedback": feedback_data,
@@ -3026,3 +2898,267 @@ def retrieve_feedback(request):
         "error": "Invalid HTTP method. Only POST allowed.",
         "status_code": 405
     }, status=405)
+
+
+
+@csrf_exempt
+def report_inventory_summary(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid HTTP method. Only POST is allowed.", "status_code": 405}, status=405)
+
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+        admin_id = data.get('admin_id')
+
+        if not admin_id:
+            return JsonResponse({"error": "admin_id is required.", "status_code": 400}, status=400)
+
+        total_products = ProductsDetails.objects.filter(admin_id=admin_id).count()
+        total_customers = CustomerRegisterDetails.objects.filter(admin_id=admin_id).count()
+
+        low_stock_products = ProductsDetails.objects.filter(
+            admin_id=admin_id,
+            quantity__lt=10
+        ).values('product_name', 'sku_number', 'quantity')
+
+        return JsonResponse({
+            "total_products": total_products,
+            "total_customers": total_customers,
+            "low_stock_products": list(low_stock_products),
+            "status_code": 200,
+            "admin_id": admin_id
+        }, status=200)
+    
+    except Exception as e:
+        return JsonResponse({"error": str(e), "status_code": 500}, status=500)
+
+
+from django.db.models import Sum
+from django.db.models import Count
+
+@csrf_exempt
+def top_buyers_report(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid HTTP method. Only POST is allowed.", "status_code": 405}, status=405)
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+        admin_id = data.get('admin_id')
+
+        if not admin_id:
+            return JsonResponse({"error": "admin_id is required.", "status_code": 400}, status=400)
+
+        payments = PaymentDetails.objects.filter(admin_id=admin_id)
+
+        all_order_product_ids = []
+        for p in payments:
+            if isinstance(p.order_product_ids, list):
+                all_order_product_ids.extend(p.order_product_ids)
+
+     
+        buyers_data = (
+            OrderProducts.objects
+            .filter(admin_id=admin_id, id__in=all_order_product_ids)
+            .values('customer_id')
+            .annotate(
+                product_count=Count('product_id'),      
+                total_quantity=Sum('quantity')          
+            )
+            .order_by('-total_quantity')  
+        )
+
+        result = []
+        for buyer in buyers_data:
+            try:
+                customer = CustomerRegisterDetails.objects.get(id=buyer['customer_id'])
+                result.append({
+                    "customer_id": customer.id,
+                    "name": f"{customer.first_name} {customer.last_name}",
+                    "email": customer.email,
+                    "mobile_no": customer.mobile_no,
+                    "product_count": buyer['product_count'],
+                    "total_quantity": buyer['total_quantity']
+                })
+            except CustomerRegisterDetails.DoesNotExist:
+                continue
+
+        return JsonResponse({
+            "buyers": result,
+            "status_code": 200,
+            "admin_id": admin_id
+        }, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e), "status_code": 500}, status=500)
+
+from django.db.models import Count, F
+
+@csrf_exempt
+def customer_growth_by_state(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            admin_id = data.get("admin_id")
+
+            if not admin_id:
+                return JsonResponse({
+                    "status_code": 400,
+                    "message": "admin_id is required."
+                })
+
+            # Filter customers for given admin_id with non-empty mobile number
+            customers = CustomerRegisterDetails.objects.filter(
+                admin_id=admin_id
+            ).exclude(mobile_no="")
+
+            # Filter matched addresses where mobile number is same as in CustomerRegisterDetails
+            matched_addresses = CustomerAddress.objects.filter(
+                customer__in=customers,
+                mobile_number=F('customer__mobile_no')
+            ).exclude(state="").values(
+                'state',
+                'district',
+                'pincode',
+                'mandal',
+                'village',
+                'postoffice'
+            ).annotate(
+                customer_count=Count('customer', distinct=True)
+            ).order_by('-customer_count')
+
+            return JsonResponse({
+                "status_code": 200,
+                "message": "Customer growth by state (mobile number match)",
+                "data": list(matched_addresses)
+            })
+
+        except Exception as e:
+            return JsonResponse({
+                "status_code": 500,
+                "message": "Error occurred.",
+                "error": str(e)
+            })
+    else:
+        return JsonResponse({
+            "status_code": 405,
+            "message": "Method Not Allowed. Use POST."
+        }, status=405)
+
+
+
+
+# from django.db.models.functions import TruncMonth
+# @csrf_exempt
+# def monthly_product_orders(request):
+#     if request.method == "POST":
+#         try:
+#             data = json.loads(request.body.decode('utf-8'))
+#             admin_id = data.get("admin_id")
+
+#             if not admin_id:
+#                 return JsonResponse({
+#                     "status_code": 400,
+#                     "message": "admin_id is required."
+#                 })
+
+#             # Monthly grouping of total products ordered by quantity
+#             monthly_data = OrderProducts.objects.filter(
+#                 admin_id=admin_id
+#             ).annotate(
+#                 month=TruncMonth('created_at')
+#             ).values(
+#                 'month'
+#             ).annotate(
+#                 total_quantity=Sum('quantity')
+#             ).order_by('month')
+
+#             # Format month as string
+#             result = [
+#                 {
+#                     "month": item["month"].strftime("%Y-%m"),
+#                     "total_quantity": item["total_quantity"]
+#                 }
+#                 for item in monthly_data
+#             ]
+
+#             return JsonResponse({
+#                 "status_code": 200,
+#                 "message": "Monthly total products ordered.",
+#                 "data": result
+#             })
+
+#         except Exception as e:
+#             return JsonResponse({
+#                 "status_code": 500,
+#                 "message": "Error occurred.",
+#                 "error": str(e)
+#             })
+#     else:
+#         return JsonResponse({
+#             "status_code": 405,
+#             "message": "Method Not Allowed. Use POST."
+#         }, status=405)
+
+
+from django.db.models.functions import TruncMonth
+@csrf_exempt
+def monthly_product_orders(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            admin_id = data.get("admin_id")
+
+            if not admin_id:
+                return JsonResponse({
+                    "status_code": 400,
+                    "message": "admin_id is required."
+                })
+
+            # Get all successfully paid order IDs
+            paid_order_ids = PaymentDetails.objects.filter(
+                admin_id=admin_id,
+                razorpay_payment_id__isnull=False
+            ).values_list("order_product_ids", flat=True)
+
+            # Flatten the list of JSONField lists
+            order_ids = []
+            for item in paid_order_ids:
+                order_ids.extend(item)  # Because order_product_ids is a list (JSONField)
+
+            # Monthly grouping of only paid orders
+            monthly_data = OrderProducts.objects.filter(
+                admin_id=admin_id,
+                id__in=order_ids
+            ).annotate(
+                month=TruncMonth('created_at')
+            ).values(
+                'month'
+            ).annotate(
+                total_quantity=Sum('quantity')
+            ).order_by('month')
+
+            
+            result = [
+                {
+                    "month": item["month"].strftime("%Y-%m"),
+                    "total_quantity": item["total_quantity"]
+                }
+                for item in monthly_data
+            ]
+
+            return JsonResponse({
+                "status_code": 200,
+                "message": "Monthly total products ordered.",
+                "data": result
+            })
+
+        except Exception as e:
+            return JsonResponse({
+                "status_code": 500,
+                "message": "Error occurred.",
+                "error": str(e)
+            })
+    else:
+        return JsonResponse({
+            "status_code": 405,
+            "message": "Method Not Allowed. Use POST."
+        }, status=405)
