@@ -72,7 +72,7 @@ const EditCategory = () => {
     if (image) formData.append("category_image", image);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/edit-category", {
+      const response = await fetch("http://65.0.183.78:8000/edit-category", {
         method: "POST",
         body: formData,
       });

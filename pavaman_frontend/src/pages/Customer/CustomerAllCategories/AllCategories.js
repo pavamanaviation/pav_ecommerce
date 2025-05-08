@@ -15,7 +15,7 @@ const AllCategories = () => {
   useEffect(() => {
     const fetchCategoriesAndSubcategories = async () => {
       try {
-        const categoryRes = await axios.post("http://127.0.0.1:8000/get-all-category-subcategory", {
+        const categoryRes = await axios.post("http://65.0.183.78:8000/get-all-category-subcategory", {
           customer_id: customerId,
         });
 
@@ -50,7 +50,7 @@ const AllCategories = () => {
         const results = [];
 
         for (const category of categoriesWithSubcategories) {
-          const response = await axios.post("http://127.0.0.1:8000/customer-search-subcategories", {
+          const response = await axios.post("http://65.0.183.78:8000/customer-search-subcategories", {
             customer_id: customerId,
             category_id: category.category_id,
             sub_category_name: searchValue,
@@ -67,7 +67,7 @@ const AllCategories = () => {
               sub_categoryies: response.data.categories.map((sub) => ({
                 id: sub.sub_category_id,
                 sub_category_name: sub.sub_category_name,
-                sub_category_image: `http://127.0.0.1:8000${sub.sub_category_image}`,
+                sub_category_image: `http://65.0.183.78:8000${sub.sub_category_image}`,
               })),
             });
           }

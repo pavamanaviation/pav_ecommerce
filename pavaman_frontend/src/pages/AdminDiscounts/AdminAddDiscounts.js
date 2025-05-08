@@ -22,7 +22,7 @@ const AdminAddDiscount = () => {
     if (!adminId) return navigate("/admin-login");
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/view-categories", {
+      const response = await fetch("http://65.0.183.78:8000/view-categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ admin_id: adminId }),
@@ -41,7 +41,7 @@ const AdminAddDiscount = () => {
     if (!adminId || !selectedCategoryId) return;
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/view-subcategories", {
+      const response = await fetch("http://65.0.183.78:8000/view-subcategories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -108,7 +108,7 @@ const AdminAddDiscount = () => {
     };
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/apply-discount-subcategory', payload);
+      const response = await axios.post('http://65.0.183.78:8000/apply-discount-subcategory', payload);
       if (response.data.status_code === 200) {
         setSuccess('Discount applied successfully!');
         setTimeout(() => navigate('/discounts'), 2000);

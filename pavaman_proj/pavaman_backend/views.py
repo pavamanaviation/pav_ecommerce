@@ -475,12 +475,22 @@ def edit_category(request):
             if not category:
                 return JsonResponse({"error": "Category not found.", "status_code": 404}, status=404)
 
-            # if CategoryDetails.objects.filter(category_name=category_name,id=category_id).exists():
-            #     return JsonResponse({"error": "Category name already exists.", "status_code": 409}, status=409)
             if CategoryDetails.objects.filter(category_name=category_name).exclude(id=category_id).exists():
                 return JsonResponse({"error": "Category name already exists.", "status_code": 409}, status=409)
 
+            # Save category name
             category.category_name = category_name
+
+            # Format category name for image filename
+            formatted_category_name = category_name.replace(' ', '_').replace('/', '_')
+
+            # Connect to S3
+            s3 = boto3.client(
+                's3',
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                region_name=settings.AWS_S3_REGION_NAME
+            )
 
             if 'category_image' in request.FILES:
                 category_image = request.FILES['category_image']
@@ -493,25 +503,59 @@ def edit_category(request):
                         "status_code": 400
                     }, status=400)
 
-                formatted_category_name = category_name.replace(' ', '_').replace('/', '_')
                 image_name = f"{formatted_category_name}_{category_image.name}"
+                s3_file_key = f"static/images/category/{image_name}"
 
-                image_path = os.path.join('static', 'images', 'category', image_name)
-                image_path_full = os.path.join(settings.BASE_DIR, image_path)
+                # Delete old image if it exists
+                if category.category_image:
+                    try:
+                        s3.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=category.category_image)
+                    except Exception as delete_err:
+                        print("Warning: Could not delete old image:", delete_err)
 
-                os.makedirs(os.path.dirname(image_path_full), exist_ok=True)
-                with open(image_path_full, 'wb') as f:
-                    for chunk in category_image.chunks():
-                        f.write(chunk)
-                category.category_image = image_path.replace("\\", "/")
+                # Upload new image
+                s3.upload_fileobj(
+                    category_image,
+                    settings.AWS_STORAGE_BUCKET_NAME,
+                    s3_file_key,
+                    ExtraArgs={'ContentType': category_image.content_type}
+                )
+
+                category.category_image = s3_file_key
+
+            elif category.category_image:
+                # Rename old image if name changed and no new image uploaded
+                old_key = category.category_image
+                original_file_name = old_key.split('/')[-1].split('_')[-1]  # e.g., order-2.png
+                new_key = f"static/images/category/{formatted_category_name}_{original_file_name}"
+
+                if old_key != new_key:
+                    try:
+                        # Copy to new key
+                        s3.copy_object(
+                            Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+                            CopySource={'Bucket': settings.AWS_STORAGE_BUCKET_NAME, 'Key': old_key},
+                            Key=new_key,
+                            MetadataDirective='REPLACE',
+                            ContentType=f'image/{original_file_name.split(".")[-1]}'
+                        )
+                        # Delete old key
+                        s3.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=old_key)
+
+                        # Update DB key
+                        category.category_image = new_key
+                    except Exception as rename_err:
+                        print("Warning: Could not rename image on S3:", rename_err)
 
             category.save()
+
+            image_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{category.category_image}" if category.category_image else None
 
             return JsonResponse({
                 "message": "Category updated successfully.",
                 "category_id": str(category.id),
                 "category_name": category.category_name,
-                "category_image_url": f"/{category.category_image}",
+                "category_image_url": image_url,
                 "status_code": 200
             }, status=200)
 
@@ -519,160 +563,6 @@ def edit_category(request):
             return JsonResponse({"error": f"An unexpected error occurred: {str(e)}", "status_code": 500}, status=500)
 
     return JsonResponse({"error": "Invalid HTTP method. Only POST is allowed.", "status_code": 405}, status=405)
-
-
-# @csrf_exempt
-# def edit_category(request):
-#     if request.method == 'POST':
-#         try:
-#             data = request.POST
-#             category_id = data.get('category_id')
-#             category_name = data.get('category_name')
-#             admin_id = data.get('admin_id')
-
-#             if not admin_id:
-#                 return JsonResponse({"error": "Admin is not logged in.", "status_code": 401}, status=401)
-#             if not category_id:
-#                 return JsonResponse({"error": "Category ID is required.", "status_code": 400}, status=400)
-
-#             admin_data = PavamanAdminDetails.objects.filter(id=admin_id).first()
-#             if not admin_data:
-#                 return JsonResponse({"error": "Admin not found or session expired.", "status_code": 401}, status=401)
-
-#             category = CategoryDetails.objects.filter(id=category_id, admin=admin_data, category_status=1).first()
-#             if not category:
-#                 return JsonResponse({"error": "Category not found.", "status_code": 404}, status=404)
-
-#             if CategoryDetails.objects.filter(category_name__iexact=category_name).exclude(id=category_id).exists():
-#                 return JsonResponse({"error": "Category name already exists.", "status_code": 409}, status=409)
-
-#             category.category_name = category_name
-
-#             # If a new category image is uploaded
-#             if 'category_image' in request.FILES:
-#                 category_image = request.FILES['category_image']
-#                 allowed_extensions = ['png', 'jpg', 'jpeg']
-#                 file_name, file_extension = os.path.splitext(category_image.name)
-#                 file_extension = file_extension.lower().lstrip('.')  # remove leading dot
-
-#                 if file_extension not in allowed_extensions:
-#                     return JsonResponse({
-#                         "error": f"Invalid file type. Allowed types: {', '.join(allowed_extensions)}",
-#                         "status_code": 400
-#                     }, status=400)
-
-#                 # Ensure category_name is correctly sanitized
-#                 safe_category_name = category_name.replace(' ', '_').replace('/', '_')
-
-#                 # Construct the final S3 file path with the category name and original image name
-#                 modified_category_name = f"{safe_category_name}"
-#                 safe_file_name = file_name.replace(' ', '_').replace('/', '_')
-
-#                 # Construct the S3 file key (without '_mobile')
-#                 s3_file_key = f"static/images/category/{modified_category_name}_{safe_file_name}.{file_extension}"
-
-#                 # S3 client setup
-#                 s3 = boto3.client(
-#                     's3',
-#                     aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-#                     aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-#                     region_name=settings.AWS_S3_REGION_NAME
-#                 )
-
-#                 # Delete the old image from S3 if it exists
-#                 if category.category_image:
-#                     try:
-#                         s3.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=category.category_image)
-#                     except Exception as delete_err:
-#                         print("Warning: Could not delete old image from S3:", str(delete_err))
-
-#                 # Upload the new image to S3 with the updated file name
-#                 s3.upload_fileobj(
-#                     category_image,
-#                     settings.AWS_STORAGE_BUCKET_NAME,
-#                     s3_file_key,
-#                     ExtraArgs={'ContentType': category_image.content_type}
-#                 )
-
-#                 # Update the category image field in the database
-#                 category.category_image = s3_file_key
-
-#             else:
-#                 # If no new image is uploaded, rename the existing image based on the updated category name
-
-                         
-#                 # If no new image is uploaded, rename the existing image based on the updated category name
-#                 # Ensure category_name is correctly sanitized
-#                 safe_category_name = category_name.replace(' ', '_').replace('/', '_')
-
-#                 # Extract the file name and extension from the existing image path
-#                 existing_file_name, file_extension = os.path.splitext(category.category_image)
-#                 existing_file_name = existing_file_name.split('/')[-1]  # Get the image name without path
-
-#                 # If the existing image has '_mobile' in the name, we should keep it
-#                 if '_mobile' in existing_file_name:
-#                     # Remove the existing category name and retain the '_mobile' suffix
-#                     existing_image_name = existing_file_name.split('_')[-1]
-#                     modified_category_name = f"{safe_category_name}_{existing_image_name}"
-#                 else:
-#                     # If no '_mobile' suffix, just use the new category name with the image name
-#                     modified_category_name = f"{safe_category_name}_{existing_file_name}"
-
-#                 # Construct the new S3 file path with the new category name and the original image name
-#                 new_s3_file_key = f"static/images/category/{modified_category_name}{file_extension}"
-
-#                 # S3 client setup
-#                 s3 = boto3.client(
-#                     's3',
-#                     aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-#                     aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-#                     region_name=settings.AWS_S3_REGION_NAME
-#                 )
-
-#                 # Rename the file in S3
-#                 try:
-#                     # Copy the old file to the new location with the new name
-#                     s3.copy_object(
-#                         Bucket=settings.AWS_STORAGE_BUCKET_NAME,
-#                         CopySource={
-#                             'Bucket': settings.AWS_STORAGE_BUCKET_NAME,
-#                             'Key': category.category_image
-#                         },
-#                         Key=new_s3_file_key
-#                     )
-
-#                     # Delete the old image after copy
-#                     s3.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=category.category_image)
-
-#                     # Update the category image field in the database with the new file name
-#                     category.category_image = new_s3_file_key
-#                 except Exception as rename_err:
-#                     print(f"Warning: Could not rename image on S3: {str(rename_err)}")
-
-
-#             category.save()
-
-#             # Construct the image URL
-#             image_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{category.category_image}"
-
-#             # Remove '_mobile' from the image URL (if present)
-#             image_url_without_mobile = image_url.replace('_mobile', '')
-
-#             return JsonResponse({
-#                 "message": "Category updated successfully.",
-#                 "category_id": category.id,
-#                 "category_name": category.category_name,
-#                 "category_image_url": image_url_without_mobile,  # Send the updated URL without '_mobile'
-#                 "status_code": 200
-#             }, status=200)
-
-#         except Exception as e:
-#             return JsonResponse({
-#                 "error": f"An unexpected error occurred: {str(e)}",
-#                 "status_code": 500
-#             }, status=500)
-
-#     return JsonResponse({"error": "Invalid HTTP method. Only POST is allowed.", "status_code": 405}, status=405)
 
 @csrf_exempt
 def delete_category(request):
@@ -734,121 +624,6 @@ def delete_category(request):
             return JsonResponse({"error": f"An unexpected error occurred: {str(e)}", "status_code": 500}, status=500)
 
     return JsonResponse({"error": "Invalid HTTP method. Only POST is allowed.", "status_code": 405}, status=405)
-
-
-# @csrf_exempt
-# def add_subcategory(request):
-#     if request.method == 'POST':
-#         try:
-#             data = request.POST
-#             subcategory_name = data.get('subcategory_name').lower()
-#             category_id = data.get('category_id')
-#             admin_id = data.get('admin_id')
-#             subcategory_status = 1
-
-#             if not subcategory_name:
-#                 return JsonResponse({"error": "Subcategory name is required.", "status_code": 400}, status=400)
-
-#             if not admin_id:
-#                 return JsonResponse({"error": "Admin is not logged in.", "status_code": 401}, status=401)
-
-#             try:
-#                 admin_data = PavamanAdminDetails.objects.get(id=admin_id)
-#             except PavamanAdminDetails.DoesNotExist:
-#                 return JsonResponse({"error": "Admin session expired or invalid.", "status_code": 401}, status=401)
-
-#             try:
-#                 category = CategoryDetails.objects.get(id=category_id, admin=admin_data)
-#             except CategoryDetails.DoesNotExist:
-#                 return JsonResponse({"error": "Category not found.", "status_code": 404}, status=404)
-
-#             if SubCategoryDetails.objects.filter(sub_category_name=subcategory_name, category=category).exists():
-#                 return JsonResponse({
-#                     "error": f"Subcategory '{subcategory_name}' already exists under category '{category.category_name}'.",
-#                     "status_code": 409
-#                 }, status=409)
-
-#             existing_subcategory = SubCategoryDetails.objects.filter(sub_category_name=subcategory_name).exclude(category=category).first()
-#             if existing_subcategory:
-#                 return JsonResponse({
-#                     "error": f"Subcategory '{subcategory_name}' already exists under a different category '{existing_subcategory.category.category_name}'.",
-#                     "status_code": 409
-#                 }, status=409)
-
-#             subcategory_image = request.FILES.get('sub_category_image', None)
-#             if not subcategory_image:
-#                 return JsonResponse({"error": "Subcategory image file is required.", "status_code": 400}, status=400)
-
-#             llowed_extensions = ['png', 'jpg', 'jpeg']
-#             file_name, file_extension = os.path.splitext(subcategory_image.name)
-#             file_extension = file_extension.lower().lstrip('.')  # remove dot
-
-#             if file_extension not in allowed_extensions:
-#                 return JsonResponse({"error": f"Invalid file type. Allowed types: {', '.join(allowed_extensions)}", "status_code": 400}, status=400)
-
-#             # Safe file and path name
-#             safe_subcat_name = subcategory_name.replace(' ', '_').replace('/', '_')
-#             safe_file_name = file_name.replace(' ', '_').replace('/', '_')
-#             s3_file_key = f"static/images/subcategory/{safe_subcat_name}_{safe_file_name}.{file_extension}"
-
-#             # Upload image to AWS S3
-#             s3 = boto3.client(
-#                 's3',
-#                 aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-#                 aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-#                 region_name=settings.AWS_S3_REGION_NAME
-#             )
-#             s3.upload_fileobj(
-#                 subcategory_image,
-#                 settings.AWS_STORAGE_BUCKET_NAME,
-#                 s3_file_key,
-#                 ExtraArgs={'ContentType': subcategory_image.content_type}
-#             )
-
-#             image_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{s3_file_key}"
-
-#             # allowed_extensions = ['png', 'jpg', 'jpeg']
-#             # file_extension = subcategory_image.name.split('.')[-1].lower()
-#             # if file_extension not in allowed_extensions:
-#             #     return JsonResponse({"error": f"Invalid file type. Allowed types: {', '.join(allowed_extensions)}", "status_code": 400}, status=400)
-
-#             # image_name = f"{subcategory_name}_{subcategory_image.name}".replace('\\', '_')
-#             # image_path = os.path.join('static', 'images', 'subcategory', image_name).replace("\\", "/")
-
-#             # full_path = os.path.join(settings.BASE_DIR, image_path)
-#             # os.makedirs(os.path.dirname(full_path), exist_ok=True)
-
-#             # with open(full_path, 'wb') as f:
-#             #     for chunk in subcategory_image.chunks():
-#             #         f.write(chunk)
-
-#             current_time = datetime.utcnow() + timedelta(hours=5, minutes=30)
-
-#             subcategory = SubCategoryDetails(
-#                 sub_category_name=subcategory_name,
-#                 category=category,
-#                 sub_category_image=image_path,
-#                 sub_category_status=subcategory_status,
-#                 admin=admin_data,
-#                 created_at=current_time
-#             )
-#             subcategory.save()
-
-#             return JsonResponse({
-#                 "message": "Subcategory added successfully",
-#                 "subcategory_id": subcategory.id,
-#                 "category_id": category.id,
-#                 "category_name": category.category_name,
-#                 "subcategory_image_url": image_url,
-#                 # "subcategory_image_url": f"/{image_path}",
-#                 "subcategory_status": subcategory.sub_category_status,
-#                 "status_code": 201
-#             }, status=201)
-
-#         except Exception as e:
-#             return JsonResponse({"error": f"An unexpected error occurred: {str(e)}", "status_code": 500}, status=500)
-
-#     return JsonResponse({"error": "Invalid HTTP method. Only POST is allowed.", "status_code": 405}, status=405)
 
 
 @csrf_exempt
@@ -954,63 +729,6 @@ def add_subcategory(request):
 
     return JsonResponse({"error": "Invalid HTTP method. Only POST is allowed.", "status_code": 405}, status=405)
 
-
-
-# @csrf_exempt
-# def view_subcategories(request):
-#     if request.method == 'POST':
-#         try:
-#             data = json.loads(request.body.decode('utf-8'))
-#             admin_id = data.get('admin_id')
-#             category_id = data.get('category_id')
-
-#             if not admin_id or not category_id:
-#                 return JsonResponse({
-#                     "error": "Admin id and Category id are required.",
-#                     "status_code": 400
-#                 }, status=400)
-
-#             try:
-#                 admin = PavamanAdminDetails.objects.get(id=admin_id)
-#                 category = CategoryDetails.objects.get(id=category_id, admin=admin)
-#             except PavamanAdminDetails.DoesNotExist:
-#                 return JsonResponse({"error": "Admin not found or session expired.", "status_code": 404}, status=404)
-#             except CategoryDetails.DoesNotExist:
-#                 return JsonResponse({"error": "Category not found.", "status_code": 404}, status=404)
-
-#             subcategories = SubCategoryDetails.objects.filter(category=category).values(
-#                 'id', 'sub_category_name', 'sub_category_image'
-#             )
-
-#             if not subcategories:
-#                 return JsonResponse({
-#                     "message": "No subcategories found.",
-#                     "status_code": 200,
-#                     "subcategories": []
-#                 }, status=200)
-
-#             return JsonResponse({
-#                 "message": "Subcategories retrieved successfully.",
-#                 "status_code": 200,
-#                 "category_id": category.id,
-#                 "category_name": category.category_name,
-#                 "subcategories": list(subcategories)
-#             }, status=200)
-
-#         except json.JSONDecodeError:
-#             return JsonResponse({
-#                 "error": "Invalid JSON format.",
-#                 "status_code": 400
-#             }, status=400)
-#         except Exception as e:
-#             return JsonResponse({
-#                 "error": f"An unexpected error occurred: {str(e)}",
-#                 "status_code": 500
-#             }, status=500)
-
-#     return JsonResponse({"error": "Invalid HTTP method. Only POST is allowed.", "status_code": 405}, status=405)
-
-
 @csrf_exempt
 def view_subcategories(request):
     if request.method == 'POST':
@@ -1077,94 +795,13 @@ def view_subcategories(request):
     return JsonResponse({"error": "Invalid HTTP method. Only POST is allowed.", "status_code": 405}, status=405)
 
 
-# @csrf_exempt
-# def edit_subcategory(request):
-#     if request.method == 'POST':
-#         try:
-#             data = request.POST
-#             subcategory_id = data.get('subcategory_id')
-#             sub_category_name = data.get('subcategory_name').lower()
-#             category_id = data.get('category_id')
-#             admin_id = data.get('admin_id')
-
-#             if not admin_id:
-#                 return JsonResponse({"error": "Admin is not logged in.", "status_code": 401}, status=401)
-#             if not subcategory_id:
-#                 return JsonResponse({"error": "Subcategory ID is required.", "status_code": 400}, status=400)
-#             if not sub_category_name:
-#                 return JsonResponse({"error": "Subcategory Name is required.", "status_code": 400}, status=400)
-
-#             admin_data = PavamanAdminDetails.objects.filter(id=admin_id).first()
-#             if not admin_data:
-#                 return JsonResponse({"error": "Admin not found or session expired.", "status_code": 401}, status=401)
-
-#             category = CategoryDetails.objects.filter(id=category_id, admin=admin_data).first()
-#             if not category:
-#                 return JsonResponse({"error": "Category not found.", "status_code": 404}, status=404)
-
-#             subcategory = SubCategoryDetails.objects.filter(id=subcategory_id, category=category).first()
-#             if not subcategory:
-#                 return JsonResponse({"error": "Subcategory not found.", "status_code": 404}, status=404)
-
-#             existing_subcategory = SubCategoryDetails.objects.filter(
-#                 sub_category_name=sub_category_name, category=category
-#             ).exclude(id=subcategory_id).first()
-
-#             if existing_subcategory:
-#                 return JsonResponse({
-#                     "error": f"Subcategory name already exists under {category.category_name}",
-#                     "status_code": 409
-#                 }, status=409)
-
-#             subcategory.sub_category_name = sub_category_name
-
-#             # Handle the image upload only if provided.
-#             subcategory_image = request.FILES.get('sub_category_image', None)
-#             if subcategory_image:
-#                 allowed_extensions = ['png', 'jpg', 'jpeg']
-#                 # Use the correct attribute to get the file name.
-#                 file_extension = subcategory_image.name.split('.')[-1].lower()
-
-#                 if file_extension not in allowed_extensions:
-#                     return JsonResponse({"error": f"Invalid file type. Allowed types: {', '.join(allowed_extensions)}", "status_code": 400}, status=400)
-
-#                 # Generate a new image name using the sub_category_name and the original file name.
-#                 image_name = f"{sub_category_name}_{subcategory_image.name}".replace('\\', '_')
-#                 image_path = os.path.join('static', 'images', 'subcategory', image_name).replace("\\", "/")
-
-#                 full_path = os.path.join(settings.BASE_DIR, image_path)
-#                 os.makedirs(os.path.dirname(full_path), exist_ok=True)
-
-#                 with open(full_path, 'wb') as f:
-#                     for chunk in subcategory_image.chunks():
-#                         f.write(chunk)
-
-#                 subcategory.sub_category_image = image_path
-
-#             subcategory.save()
-
-#             return JsonResponse({
-#                 "message": "Subcategory updated successfully.",
-#                 "category_id": subcategory.category.id,
-#                 "category_name": subcategory.category.category_name,
-#                 "subcategory_id": subcategory.id,
-#                 "subcategory_name": subcategory.sub_category_name,
-#                 "subcategory_image_url": f"/static/{subcategory.sub_category_image}" if subcategory.sub_category_image else None,
-#                 "status_code": 200
-#             }, status=200)
-
-#         except Exception as e:
-#             return JsonResponse({"error": f"An unexpected error occurred: {str(e)}", "status_code": 500}, status=500)
-
-#     return JsonResponse({"error": "Invalid HTTP method. Only POST is allowed.", "status_code": 405}, status=405)
-
 @csrf_exempt
 def edit_subcategory(request):
     if request.method == 'POST':
         try:
             data = request.POST
             subcategory_id = data.get('subcategory_id')
-            sub_category_name = data.get('subcategory_name')
+            sub_category_name = data.get('subcategory_name').lower()
             category_id = data.get('category_id')
             admin_id = data.get('admin_id')
 
@@ -1179,7 +816,7 @@ def edit_subcategory(request):
             if not admin_data:
                 return JsonResponse({"error": "Admin not found or session expired.", "status_code": 401}, status=401)
 
-            category = CategoryDetails.objects.filter(id=category_id, admin=admin_data, category_status=1).first()
+            category = CategoryDetails.objects.filter(id=category_id, admin=admin_data).first()
             if not category:
                 return JsonResponse({"error": "Category not found.", "status_code": 404}, status=404)
 
@@ -1187,42 +824,46 @@ def edit_subcategory(request):
             if not subcategory:
                 return JsonResponse({"error": "Subcategory not found.", "status_code": 404}, status=404)
 
-            if SubCategoryDetails.objects.filter(sub_category_name__iexact=sub_category_name, category=category).exclude(id=subcategory_id).exists():
-                return JsonResponse({"error": "Subcategory name already exists under this category.", "status_code": 409}, status=409)
+            existing_subcategory = SubCategoryDetails.objects.filter(
+                sub_category_name=sub_category_name, category=category
+            ).exclude(id=subcategory_id).first()
 
-            subcategory.sub_category_name = sub_category_name.lower()
+            if existing_subcategory:
+                return JsonResponse({
+                    "error": f"Subcategory name already exists under {category.category_name}",
+                    "status_code": 409
+                }, status=409)
+
+            subcategory.sub_category_name = sub_category_name
+            formatted_sub_name = sub_category_name.replace(' ', '_').replace('/', '_')
+
+            # Connect to S3
+            s3 = boto3.client(
+                's3',
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                region_name=settings.AWS_S3_REGION_NAME
+            )
 
             if 'sub_category_image' in request.FILES:
                 subcategory_image = request.FILES['sub_category_image']
+
                 allowed_extensions = ['png', 'jpg', 'jpeg']
-                file_name, file_extension = os.path.splitext(subcategory_image.name)
-                file_extension = file_extension.lower().lstrip('.')
-
+                file_extension = subcategory_image.name.split('.')[-1].lower()
                 if file_extension not in allowed_extensions:
-                    return JsonResponse({
-                        "error": f"Invalid file type. Allowed types: {', '.join(allowed_extensions)}",
-                        "status_code": 400
-                    }, status=400)
+                    return JsonResponse({"error": f"Invalid file type. Allowed types: {', '.join(allowed_extensions)}", "status_code": 400}, status=400)
 
-                safe_subcategory_name = sub_category_name.replace(' ', '_').replace('/', '_')
-                safe_file_name = file_name.replace(' ', '_').replace('/', '_')
-                s3_file_key = f"static/images/subcategory/{safe_subcategory_name}_{safe_file_name}.{file_extension}"
+                image_name = f"{formatted_sub_name}_{subcategory_image.name}"
+                s3_file_key = f"static/images/subcategory/{image_name}"
 
-                s3 = boto3.client(
-                    's3',
-                    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-                    region_name=settings.AWS_S3_REGION_NAME
-                )
-
-                # Delete old image from S3 if it exists
+                # Delete old image if exists
                 if subcategory.sub_category_image:
                     try:
                         s3.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=subcategory.sub_category_image)
-                    except Exception as delete_err:
-                        print("Warning: Could not delete old subcategory image from S3:", str(delete_err))
+                    except Exception as e:
+                        print("Warning: Failed to delete old subcategory image:", e)
 
-                # Upload new image to S3
+                # Upload new image
                 s3.upload_fileobj(
                     subcategory_image,
                     settings.AWS_STORAGE_BUCKET_NAME,
@@ -1231,6 +872,30 @@ def edit_subcategory(request):
                 )
 
                 subcategory.sub_category_image = s3_file_key
+
+            elif subcategory.sub_category_image:
+                # Rename logic if name changed and image not uploaded
+                old_key = subcategory.sub_category_image
+                original_file_name = old_key.split('/')[-1].split('_')[-1]  # Get actual image filename
+                new_key = f"static/images/subcategory/{formatted_sub_name}_{original_file_name}"
+
+                if old_key != new_key:
+                    try:
+                        # Copy old to new
+                        s3.copy_object(
+                            Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+                            CopySource={'Bucket': settings.AWS_STORAGE_BUCKET_NAME, 'Key': old_key},
+                            Key=new_key,
+                            MetadataDirective='REPLACE',
+                            ContentType=f"image/{original_file_name.split('.')[-1]}"
+                        )
+                        # Delete old image
+                        s3.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=old_key)
+
+                        # Update DB key
+                        subcategory.sub_category_image = new_key
+                    except Exception as e:
+                        print("Warning: Failed to rename subcategory image:", e)
 
             subcategory.save()
 
@@ -1247,13 +912,9 @@ def edit_subcategory(request):
             }, status=200)
 
         except Exception as e:
-            return JsonResponse({
-                "error": f"An unexpected error occurred: {str(e)}",
-                "status_code": 500
-            }, status=500)
+            return JsonResponse({"error": f"An unexpected error occurred: {str(e)}", "status_code": 500}, status=500)
 
     return JsonResponse({"error": "Invalid HTTP method. Only POST is allowed.", "status_code": 405}, status=405)
-
 
 @csrf_exempt
 def delete_subcategory(request):
@@ -1362,9 +1023,6 @@ def add_product(request):
                 if discount > price:
                     return JsonResponse({"error": "Discount amount cannot be more than the price.", "status_code": 400}, status=400)
                 
-                # discount_percentage = (discount / price) * 100
-                # discount = f"{round(discount_percentage)}%"
-
             except ValueError:
                 return JsonResponse({"error": "Invalid format for price, quantity, or discount.", "status_code": 400}, status=400)
 
@@ -1488,13 +1146,6 @@ def add_product(request):
             return JsonResponse({"error": f"Unexpected error: {str(e)}", "status_code": 500}, status=500)
 
     return JsonResponse({"error": "Invalid request method. Only POST is allowed.", "status_code": 405}, status=405)
-
-
-
-
-
-
-
 
 @csrf_exempt
 def add_product_specifications(request):
@@ -3099,7 +2750,75 @@ def customer_growth_by_state(request):
 #         }, status=405)
 
 
+# from django.db.models.functions import TruncMonth
+# @csrf_exempt
+# def monthly_product_orders(request):
+#     if request.method == "POST":
+#         try:
+#             data = json.loads(request.body.decode('utf-8'))
+#             admin_id = data.get("admin_id")
+
+#             if not admin_id:
+#                 return JsonResponse({
+#                     "status_code": 400,
+#                     "message": "admin_id is required."
+#                 })
+
+#             # Get all successfully paid order IDs
+#             paid_order_ids = PaymentDetails.objects.filter(
+#                 admin_id=admin_id,
+#                 razorpay_payment_id__isnull=False
+#             ).values_list("order_product_ids", flat=True)
+
+#             # Flatten the list of JSONField lists
+#             order_ids = []
+#             for item in paid_order_ids:
+#                 order_ids.extend(item)  # Because order_product_ids is a list (JSONField)
+
+#             # Monthly grouping of only paid orders
+#             monthly_data = OrderProducts.objects.filter(
+#                 admin_id=admin_id,
+#                 id__in=order_ids
+#             ).annotate(
+#                 month=TruncMonth('created_at')
+#             ).values(
+#                 'month'
+#             ).annotate(
+#                 total_quantity=Sum('quantity')
+#             ).order_by('month')
+
+            
+#             result = [
+#                 {
+#                     "month": item["month"].strftime("%Y-%m"),
+#                     "total_quantity": item["total_quantity"]
+#                 }
+#                 for item in monthly_data
+#             ]
+
+#             return JsonResponse({
+#                 "status_code": 200,
+#                 "message": "Monthly total products ordered.",
+#                 "data": result
+#             })
+
+#         except Exception as e:
+#             return JsonResponse({
+#                 "status_code": 500,
+#                 "message": "Error occurred.",
+#                 "error": str(e)
+#             })
+#     else:
+#         return JsonResponse({
+#             "status_code": 405,
+#             "message": "Method Not Allowed. Use POST."
+#         }, status=405)
+
+
 from django.db.models.functions import TruncMonth
+from django.utils import timezone
+from datetime import datetime
+
 @csrf_exempt
 def monthly_product_orders(request):
     if request.method == "POST":
@@ -3113,6 +2832,10 @@ def monthly_product_orders(request):
                     "message": "admin_id is required."
                 })
 
+            # Get first day of current month
+            now = timezone.now()
+            start_of_month = datetime(now.year, now.month, 1, tzinfo=timezone.get_current_timezone())
+
             # Get all successfully paid order IDs
             paid_order_ids = PaymentDetails.objects.filter(
                 admin_id=admin_id,
@@ -3122,12 +2845,13 @@ def monthly_product_orders(request):
             # Flatten the list of JSONField lists
             order_ids = []
             for item in paid_order_ids:
-                order_ids.extend(item)  # Because order_product_ids is a list (JSONField)
+                order_ids.extend(item)
 
-            # Monthly grouping of only paid orders
+            # Monthly data only for current month
             monthly_data = OrderProducts.objects.filter(
                 admin_id=admin_id,
-                id__in=order_ids
+                id__in=order_ids,
+                created_at__gte=start_of_month  # Filter by current month only
             ).annotate(
                 month=TruncMonth('created_at')
             ).values(
@@ -3136,7 +2860,6 @@ def monthly_product_orders(request):
                 total_quantity=Sum('quantity')
             ).order_by('month')
 
-            
             result = [
                 {
                     "month": item["month"].strftime("%Y-%m"),
@@ -3146,8 +2869,9 @@ def monthly_product_orders(request):
             ]
 
             return JsonResponse({
+                "admin_id":admin_id,
                 "status_code": 200,
-                "message": "Monthly total products ordered.",
+                "message": "Monthly total products ordered (current month).",
                 "data": result
             })
 

@@ -135,6 +135,17 @@
     margin: 10px auto;
 }
 
+.discount-tag {
+    /* background-color: #ff6666;  */
+    color: #fd933b;
+    font-size: 20px;
+    font-weight: bold;
+    padding: 5px 10px;
+    /* border-radius: 5px; */
+    display: inline-block;
+    margin-top: 5px;
+}
+
 @media (max-width: 1440px) {
     .customer-discount-products-section {
         grid-template-columns: repeat(5, 1fr);

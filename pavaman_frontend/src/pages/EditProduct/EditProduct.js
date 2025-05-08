@@ -86,7 +86,7 @@ const EditProduct = () => {
     });
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/edit-product", formDataToSend);
+      const response = await axios.post("http://65.0.183.78:8000/edit-product", formDataToSend);
       if (response.data.status_code === 200) {
         // alert("Product updated successfully.");
         navigate("/view-products", {

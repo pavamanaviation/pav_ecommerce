@@ -4,6 +4,7 @@ import "./CustomerProfile.css";
 import CustomerIcon from "../../../assets/images/contact-icon.avif";
 import { BiSolidPencil } from "react-icons/bi";
 import { FaTimes } from "react-icons/fa";
+import PhoneInput from "react-phone-input-2";
 
 const CustomerProfile = ({ refresh }) => {
     const navigate = useNavigate();
@@ -20,6 +21,10 @@ const CustomerProfile = ({ refresh }) => {
     const [otp, setOtp] = useState("");
     const [step, setStep] = useState(1); // 1: previous email verification, 2: new email verification
     const [newMobileOtpSent, setNewMobileOtpSent] = useState(false);
+    // const [formData, setFormData] = useState({});
+    const [showNewMobileOtpField, setShowNewMobileOtpField] = useState(false);
+
+    
 
     const fetchCustomerProfile = async () => {
         if (!customerId) {
@@ -28,7 +33,7 @@ const CustomerProfile = ({ refresh }) => {
         }
 
         try {
-            const response = await fetch("http://127.0.0.1:8000/get-customer-profile", {
+            const response = await fetch("http://65.0.183.78:8000/get-customer-profile", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ customer_id: customerId }),
@@ -94,8 +99,12 @@ const CustomerProfile = ({ refresh }) => {
         setTempData((prev) => ({ ...prev, [name]: value }));
     };
 
+    const handlePhoneChange = (value, name) => {
+        setTempData((prev) => ({ ...prev, mobile_no: value, }));
+    };
+
     const sendPreviousEmailOtp = async () => {
-        const response = await fetch("http://127.0.0.1:8000/edit-profile-email", {
+        const response = await fetch("http://65.0.183.78:8000/edit-profile-email", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -113,7 +122,7 @@ const CustomerProfile = ({ refresh }) => {
     };
 
     const verifyPreviousEmailOtp = async () => {
-        const response = await fetch("http://127.0.0.1:8000/edit-profile-email", {
+        const response = await fetch("http://65.0.183.78:8000/edit-profile-email", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -143,7 +152,7 @@ const CustomerProfile = ({ refresh }) => {
             triggerPopup("Please enter new email first", "error");
             return;
         }
-        const response = await fetch("http://127.0.0.1:8000/edit-profile-email", {
+        const response = await fetch("http://65.0.183.78:8000/edit-profile-email", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -162,7 +171,7 @@ const CustomerProfile = ({ refresh }) => {
     };
 
     const verifyNewEmailOtpAndUpdate = async () => {
-        const response = await fetch("http://127.0.0.1:8000/edit-profile-email", {
+        const response = await fetch("http://65.0.183.78:8000/edit-profile-email", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -183,12 +192,13 @@ const CustomerProfile = ({ refresh }) => {
     };
 
     const sendMobileOtp = async () => {
-        const response = await fetch("http://127.0.0.1:8000/edit-profile-mobile", {
+        const response = await fetch("http://65.0.183.78:8000/edit-profile-mobile", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 action: "send_previous_otp",
                 customer_id: customerId,
+                mobile_no: tempData.mobile_no,
             }),
         });
         const data = await response.json();
@@ -201,13 +211,14 @@ const CustomerProfile = ({ refresh }) => {
     };
 
     const verifyMobileOtp = async () => {
-        const response = await fetch("http://127.0.0.1:8000/edit-profile-mobile", {
+        const response = await fetch("http://65.0.183.78:8000/edit-profile-mobile", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 action: "verify_previous_otp",
                 customer_id: customerId,
                 otp,
+                mobile_no: tempData.mobile_no,
             }),
         });
         const data = await response.json();
@@ -226,25 +237,27 @@ const CustomerProfile = ({ refresh }) => {
     };    
 
     const sendNewMobileOtp = async () => {
-        const response = await fetch("http://127.0.0.1:8000/edit-profile-mobile", {
+        const response = await fetch("http://65.0.183.78:8000/edit-profile-mobile", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 action: "send_new_otp",
                 customer_id: customerId,
-                mobile_no: tempData.mobile_no,
+                mobile_no:"+" + tempData.mobile_no,
+               
             }),
         });
         const data = await response.json();
         if (response.ok) {
             triggerPopup(data.message, "success");
+            setShowNewMobileOtpField(true);
         } else {
             triggerPopup(data.error, "error");
         }
     };
 
     const verifyNewMobileOtp = async () => {
-        const response = await fetch("http://127.0.0.1:8000/edit-profile-mobile", {
+        const response = await fetch("http://65.0.183.78:8000/edit-profile-mobile", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -268,7 +281,7 @@ const CustomerProfile = ({ refresh }) => {
 
     const updateName = async () => {
         try {
-            const response = await fetch("http://127.0.0.1:8000/edit-customer-profile", {
+            const response = await fetch("http://65.0.183.78:8000/edit-customer-profile", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -415,14 +428,22 @@ const CustomerProfile = ({ refresh }) => {
                 <div className="edit-popup-box">
                             <h4>Edit Profile</h4>
 
-                  <input
-    type="text"
-    name="mobile_no"
-    value={tempData.mobile_no}
-    onChange={handleInputChange}
-    className="edit-input"
-    placeholder={newMobileOtpSent ? "Enter new mobile number" : "Current mobile number"}
-    disabled={otpSent && !newMobileOtpSent} // Disable during old OTP verification
+                  <PhoneInput
+    // type="text"
+    // name="mobile_no"
+    // value={tempData.mobile_no}
+    // onChange={handleInputChange}
+    // className="edit-input"
+    // placeholder={newMobileOtpSent ? "Enter new mobile number" : "Current mobile number"}
+       country={"in"}
+    //    type="text"
+       name="mobile_no"
+       value={tempData.mobile_no}
+       onChange={(value) => handlePhoneChange(value, "mobile_number")}
+       inputProps={{ name: "mobile_number", required: true }}
+       placeholder={newMobileOtpSent ? "Enter new mobile number" : "Current mobile number"}
+       required
+    //    disabled={otpSent && !newMobileOtpSent} // Disable during old OTP verification
 />
 
 
@@ -440,6 +461,7 @@ const CustomerProfile = ({ refresh }) => {
                                 onChange={(e) => setOtp(e.target.value)}
                                 placeholder="Enter OTP sent to Old Mobile"
                                 className="edit-input"
+
                             />
                             <button className="verify-otp-btn" onClick={verifyMobileOtp}>
                                 Verify OTP
@@ -447,11 +469,15 @@ const CustomerProfile = ({ refresh }) => {
                         </>
                     )}
 
-                    {newMobileOtpSent && (
+                    {newMobileOtpSent &&  (
                         <>
                             <button className="send-otp-btn" onClick={sendNewMobileOtp}>
                                 Send OTP
                             </button>
+                            
+                            {showNewMobileOtpField &&  ( 
+                        <>
+                            
                             <input
                                 type="text"
                                 value={otp}
@@ -462,9 +488,11 @@ const CustomerProfile = ({ refresh }) => {
                             <button className="verify-otp-btn" onClick={verifyNewMobileOtp}>
                                 Verify OTP
                             </button>
+                            
                         </>
                     )}
-
+                  </>
+                  )}
                     <FaTimes className="close-popup" onClick={() => setEditField(null)} />
                 </div>
             )}

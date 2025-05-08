@@ -17,7 +17,7 @@ const AdminRatings = () => {
       setLoading(true);
       setError('');
       try {
-        const response = await fetch('http://127.0.0.1:8000/retrieve-feedback', {
+        const response = await fetch('http://65.0.183.78:8000/retrieve-feedback', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ const AdminRatings = () => {
                 {feedbackList.map((item, index) => (
                   <tr key={index}>
                     <td className="order-table-data">{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                    <td className="order-table-data"><img src={item.product_image} /></td>
+                    <td className="order-table-data"><img src={item.product_image} className=' ratings-image' /></td>
                     <td className="order-table-data">{item.product_name}</td>
                     <td className="order-table-data">{item.order_id}</td>
                     <td className="order-table-data">{item.rating}</td>

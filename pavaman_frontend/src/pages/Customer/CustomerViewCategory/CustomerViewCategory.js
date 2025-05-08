@@ -36,7 +36,7 @@ const ViewCategoriesAndDiscountedProducts = () => {
       
     const fetchData = async () => {
         try {
-            const response = await fetch("http://127.0.0.1:8000/", {
+            const response = await fetch("http://65.0.183.78:8000/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -64,7 +64,7 @@ const ViewCategoriesAndDiscountedProducts = () => {
     const searchCategories = async (query) => {
         setLoading(true);
         try {
-          const response = await fetch("http://127.0.0.1:8000/customer-search-categories", {
+          const response = await fetch("http://65.0.183.78:8000/customer-search-categories", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

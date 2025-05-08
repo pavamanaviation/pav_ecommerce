@@ -31,7 +31,7 @@ const SignIn = ({ setIsAuthenticated }) => {
     }
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/admin-login", {
+      const response = await axios.post("http://65.0.183.78:8000/admin-login", {
         email,
         password,
       });
@@ -59,7 +59,7 @@ const SignIn = ({ setIsAuthenticated }) => {
   
     try {
       const verifyResponse = await axios.post(
-        "http://127.0.0.1:8000/admin-verify-otp",
+        "http://65.0.183.78:8000/admin-verify-otp",
         {
           email: adminEmail,
           otp,

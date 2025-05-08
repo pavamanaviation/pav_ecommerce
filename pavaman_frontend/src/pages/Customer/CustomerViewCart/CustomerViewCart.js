@@ -5,12 +5,12 @@ import "../CustomerViewCart/CustomerViewCart.css"
 import { RiDeleteBinLine } from "react-icons/ri";
 import PopupMessage from "../../../components/Popup/Popup";
 import { Link } from "react-router-dom";
-import {FaShoppingCart} from "react-icons/fa";
+import { FaShoppingCart } from "react-icons/fa";
 
 const CustomerViewCart = () => {
     const navigate = useNavigate();
     const [cartItems, setCartItems] = useState([]);
-    const [totalPrice, setTotalPrice] = useState(0);
+    const [total_price, setTotalPrice] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [selectedProducts, setSelectedProducts] = useState([]);
@@ -28,16 +28,16 @@ const CustomerViewCart = () => {
             console.log("Search event triggered with query:", e.detail);
             const query = e.detail;
             if (!query) {
-              fetchCartData(); 
+                fetchCartData();
             } else {
-              searchCart(query);
+                searchCart(query);
             }
-          };
-        
-          window.addEventListener("customerCategorySearch", handleSearch);
-          return () => window.removeEventListener("customerCategorySearch", handleSearch);
-        }, []);
-  
+        };
+
+        window.addEventListener("customerCategorySearch", handleSearch);
+        return () => window.removeEventListener("customerCategorySearch", handleSearch);
+    }, []);
+
 
     const displayPopup = (text, type = "success") => {
         setPopupMessage({ text, type });
@@ -63,7 +63,7 @@ const CustomerViewCart = () => {
         }
 
         try {
-            const response = await fetch("http://127.0.0.1:8000/view-cart-products", {
+            const response = await fetch("http://65.0.183.78:8000/view-cart-products", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ customer_id }),
@@ -87,7 +87,7 @@ const CustomerViewCart = () => {
     const searchCart = async (query) => {
         setLoading(true);
         const customer_id = localStorage.getItem("customer_id");
-    
+
         if (!customer_id) {
             displayPopup(
                 <>
@@ -98,27 +98,27 @@ const CustomerViewCart = () => {
             setLoading(false);
             return;
         }
-    
+
         try {
-            const response = await fetch("http://127.0.0.1:8000/customer-cart-view-search", {
+            const response = await fetch("http://65.0.183.78:8000/customer-cart-view-search", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ customer_id, product_name: query }),
             });
-    
+
             const data = await response.json();
-    
+
             if (data.status_code === 200) {
                 setCartItems(data.cart_items || []);
                 // setTotalPrice(data.cart_items?.reduce((acc, item) => acc + (item.final_price * item.quantity), 0) || 0);
                 setTotalPrice(
                     data.cart_items?.reduce(
-                      (acc, item) => acc + (item.discount_price * item.quantity), 
-                      0
+                        (acc, item) => acc + (item.discount_price * item.quantity),
+                        0
                     ) || 0
-                  );
-                  
-                  
+                );
+
+
             } else {
                 setError(data.message || "Failed to search cart.");
             }
@@ -128,7 +128,7 @@ const CustomerViewCart = () => {
             setLoading(false);
         }
     };
-    
+
     const handleDeleteCartItem = async (product_id) => {
         const customer_id = localStorage.getItem("customer_id");
         if (!customer_id) {
@@ -145,7 +145,7 @@ const CustomerViewCart = () => {
 
 
         try {
-            const response = await fetch("http://127.0.0.1:8000/delete-cart-product", {
+            const response = await fetch("http://65.0.183.78:8000/delete-cart-product", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ customer_id, product_id }),
@@ -201,7 +201,7 @@ const CustomerViewCart = () => {
         }
 
         try {
-            const response = await fetch("http://127.0.0.1:8000/delete-selected-products-cart", {
+            const response = await fetch("http://65.0.183.78:8000/delete-selected-products-cart", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ customer_id, product_ids: selectedProducts }),
@@ -268,7 +268,7 @@ const CustomerViewCart = () => {
         };
 
         try {
-            const response = await fetch("http://127.0.0.1:8000/products/order-multiple-products", {
+            const response = await fetch("http://65.0.183.78:8000/products/order-multiple-products", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(orderData),
@@ -294,60 +294,6 @@ const CustomerViewCart = () => {
         }
     };
 
-    // const handlePlaceOrderProduct = async (product_id) => {
-    //     const customer_id = localStorage.getItem("customer_id");
-    //     if (!customer_id) {
-    //         displayPopup(
-    //             <>
-    //                 Please <Link to="/customer-login" className="popup-link">log in</Link> to place order.
-    //             </>,
-    //             "error"
-    //         );
-    //         navigate("/customer-login");
-    //         return;
-    //     }
-
-    //     const productToOrder = cartItems.find(item => item.product_id === product_id);
-
-    //     if (!productToOrder) {
-    //         displayPopup("Product not found in cart.","error");
-    //         return;
-    //     }
-
-    //     const orderData = {
-    //         customer_id: String(customer_id),
-    //         products: [{
-    //             product_id: String(productToOrder.product_id),
-    //             quantity: String(productToOrder.quantity),
-    //         }],
-    //     };
-
-    //     try {
-    //         const response = await fetch("http://127.0.0.1:8000/products/order-multiple-products", {
-    //             method: "POST",
-    //             headers: { "Content-Type": "application/json" },
-    //             body: JSON.stringify(orderData),
-    //         });
-
-    //         const data = await response.json();
-
-    //         if (data.status_code === 201) {
-    //             const orderIds = data.orders.map(order => order.order_id);
-    //             const productIds = data.orders.map(order => order.product_id);
-
-    //             localStorage.setItem("order_ids", JSON.stringify(orderIds));
-    //             localStorage.setItem("product_ids", JSON.stringify(productIds));
-
-    //             navigate("/checkout-page", { state: { orderSummary: data.orders } });
-    //         } else if (data.status_code === 400) {
-    //             displayPopup(data.error ||"Requested quantity is unavailable.","error");
-    //         } else {
-    //             displayPopup(data.error || "Failed to place order.","error");
-    //         }
-    //     } catch (error) {
-    //         displayPopup("An unexpected error occurred.","error");
-    //     }
-    // };
 
     const handleQuantityChange = (product_id, change) => {
         setCartItems((prevItems) => {
@@ -431,15 +377,22 @@ const CustomerViewCart = () => {
                                             ? "few-left"
                                             : "in-stock"
                                         }`}>{item.availability}</p>
-                                    <p className="discounted-price">₹ {item.discount_price} /-</p>
+                                    <p className="discounted-price">₹ {item.final_price.toFixed(2)} /-</p>
+                                    {item.price_per_item !== item.final_price && (
+                                        <p className="original-price">₹ {item.price_per_item.toFixed(2)} /-<span className="discount-tag">
 
-                                    <p className="original-price">₹ {item.price_per_item} /-</p>
+                                            {item.discount && parseFloat(item.discount) > 0 && `${item.discount} off`}
+
+                                        </span></p>)}
+                                    {item.gst && parseFloat(item.gst) > 0 && <p className="gst">GST: {item.gst}</p>}
+
+
 
 
                                 </div>
                                 <div>
 
-                                    <p className="subtotal"><b>Subtotal: ₹ </b>{(item.discount_price * item.quantity).toFixed(2)} /-</p>
+                                    <p className="subtotal"><b>Subtotal: ₹ </b>{(item.final_price * item.quantity).toFixed(2)} /-</p>
                                     {/* {!selectedProducts.includes(item.product_id) && (
                                         <button className="product-place-order" onClick={() => handlePlaceOrderProduct(item.product_id)}>
                                             Place Order
@@ -472,7 +425,7 @@ const CustomerViewCart = () => {
                             <div className="cart-prices">
                                 <div className="cart-price">
                                     <div className="cart-price-label">Price({cartItems.length} items)</div>
-                                    <div className="cart-price-value">₹ {totalPrice} /-</div>
+                                    <div className="cart-price-value">₹ {total_price} /-</div>
                                 </div>
                                 <div className="cart-price cart-pfee">
                                     <div className="cart-price-label">Platfrom Fee</div>
@@ -484,7 +437,7 @@ const CustomerViewCart = () => {
                                 </div>
                                 <div className="cart-price cart-total">
                                     <div className="cart-price-label">Total Price</div>
-                                    <div className="cart-price-value"> ₹ {totalPrice} /-</div>
+                                    <div className="cart-price-value"> ₹ {total_price} /-</div>
 
                                 </div>
                             </div>
@@ -492,10 +445,10 @@ const CustomerViewCart = () => {
                     </div>
 
 
-                   
 
-                        {selectedProducts.length > 0 && (
-                             <div className="cart-side-section">
+
+                    {selectedProducts.length > 0 && (
+                        <div className="cart-side-section">
                             <div>
                                 <div className="cart-price-header">Total Payable</div>
                                 <div className="cart-prices">
@@ -519,10 +472,10 @@ const CustomerViewCart = () => {
                                 </div>
 
                             </div>
-                            </div>
-                        )}
-                    </div>
-                
+                        </div>
+                    )}
+                </div>
+
             </div>
         </div>
     );

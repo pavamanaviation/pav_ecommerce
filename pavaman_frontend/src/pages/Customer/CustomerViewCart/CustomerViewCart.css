@@ -228,6 +228,15 @@
 .cart-side-section{
     margin: 20px;
 }
+.gst{
+    color: #4541c1;
+    font-size: 19px;
+    font-weight: bold;
+    padding: 5px 10px;
+    /* border-radius: 5px; */
+    /* display: inline-block; */
+    margin-top: 2px;
+}
 @media (max-width: 768px) {
     .cart-page {
         flex-direction: column;

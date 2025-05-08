@@ -45,7 +45,7 @@ const EditSubcategory = () => {
     }
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/edit-subcategory", {
+      const response = await fetch("http://65.0.183.78:8000/edit-subcategory", {
         method: "POST",
         body: formData,
       });

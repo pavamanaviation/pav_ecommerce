@@ -24,7 +24,7 @@ const CustomerMobileVerification = () => {
         }
 
         try {
-            const response = await axios.post("http://127.0.0.1:8000/google-submit-mobile", {
+            const response = await axios.post("http://65.0.183.78:8000/google-submit-mobile", {
                 user_id: userId,
                 mobile_no: mobile,
             });

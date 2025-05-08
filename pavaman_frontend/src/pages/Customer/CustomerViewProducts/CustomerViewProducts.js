@@ -71,7 +71,7 @@ const CustomerViewProducts = () => {
         setError("");
 
         try {
-            const response = await fetch("http://127.0.0.1:8000/sort-products-inside-subcategory", {
+            const response = await fetch("http://65.0.183.78:8000/sort-products-inside-subcategory", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -120,7 +120,7 @@ const CustomerViewProducts = () => {
 
             console.log("📨 Product search payload:", payload);
 
-            const response = await fetch("http://127.0.0.1:8000/customer-search-products", {
+            const response = await fetch("http://65.0.183.78:8000/customer-search-products", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
@@ -179,7 +179,7 @@ const CustomerViewProducts = () => {
         }
 
         try {
-            const response = await fetch("http://127.0.0.1:8000/add-cart-product", {
+            const response = await fetch("http://65.0.183.78:8000/add-cart-product", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ customer_id, product_id, quantity: 1 }),
@@ -236,7 +236,7 @@ const CustomerViewProducts = () => {
         }
 
         try {
-            const response = await fetch('http://127.0.0.1:8000/filter-and-sort-products', {
+            const response = await fetch('http://65.0.183.78:8000/filter-and-sort-products', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -405,8 +405,18 @@ const CustomerViewProducts = () => {
 
                                         <div className="customer-product-name">{product.product_name}</div>
                                         <div className="customer-discount-section-price">₹{product.final_price}.00 (incl. GST)</div>
-                                        <div >
-                                            <div className="customer-discount-section-original-price">₹{product.price}.00 (incl. GST)</div>
+                                        <div>
+                                        {product.price !== product.final_price && (
+                                        
+                                            <div className="customer-discount-section-original-price">
+                                                ₹{product.price}.00 (incl. GST)
+                                                </div>
+                                        )}
+                                            <div className="discount-tag">
+
+                                            {product.discount && parseFloat(product.discount) > 0 && `${product.discount} off`}
+
+                                        </div>
                                             <div className="add-cart-section">
                                                 <span
                                                     className={`availability ${product.availability === "Out of Stock"

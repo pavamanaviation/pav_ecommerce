@@ -65,7 +65,7 @@ const ViewCategories = ({ categories, setCategories }) => {
     }
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/view-categories", {
+      const response = await fetch("http://65.0.183.78:8000/view-categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ admin_id: adminId }),
@@ -116,7 +116,7 @@ const ViewCategories = ({ categories, setCategories }) => {
     }
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/delete-category", {
+      const response = await fetch("http://65.0.183.78:8000/delete-category", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ category_id: Number(categoryToDelete), admin_id: adminId }),

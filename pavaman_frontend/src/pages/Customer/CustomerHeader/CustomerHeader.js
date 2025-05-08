@@ -79,7 +79,7 @@ const CustomerHeader = (onSearch) => {
     if (!customer_id) return;
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/view-cart-products", {
+      const response = await fetch("http://65.0.183.78:8000/view-cart-products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ customer_id }),
@@ -110,7 +110,7 @@ const CustomerHeader = (onSearch) => {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/", {
+      const response = await fetch("http://65.0.183.78:8000/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({}),
@@ -130,7 +130,7 @@ const CustomerHeader = (onSearch) => {
     if (subcategories[categoryName]) return;
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/categories/view-sub-categories/", {
+      const response = await fetch("http://65.0.183.78:8000/categories/view-sub-categories/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -153,7 +153,7 @@ const CustomerHeader = (onSearch) => {
     setProducts((prev) => ({ ...prev, [subCatId]: "loading" }));
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/categories/${categoryName}/${subCatName}/`,
+        `http://65.0.183.78:8000/categories/${categoryName}/${subCatName}/`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -197,7 +197,7 @@ const CustomerHeader = (onSearch) => {
   const fetchCustomerProfile = async () => {
 
     try {
-        const response = await fetch("http://127.0.0.1:8000/get-customer-profile", {
+        const response = await fetch("http://65.0.183.78:8000/get-customer-profile", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ customer_id: customerId }),

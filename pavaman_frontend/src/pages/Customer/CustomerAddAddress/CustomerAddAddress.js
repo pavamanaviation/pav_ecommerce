@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "../CustomerAddAddress/CustomerAddAddress.css";
 import PopupMessage from "../../../components/Popup/Popup";
-
+import PhoneInput from "react-phone-input-2";
 const AddCustomerAddress = ({ onAddressAdded }) => {
     const wrapperRef = useRef(null);
 
@@ -27,6 +27,7 @@ const AddCustomerAddress = ({ onAddressAdded }) => {
     const [loading, setLoading] = useState(false);
     const [popupMessage, setPopupMessage] = useState({ text: "", type: "" });
     const [showPopup, setShowPopup] = useState(false);
+    const customer_id = localStorage.getItem("customer_id");
 
     const displayPopup = (text, type = "success") => {
         setPopupMessage({ text, type });
@@ -38,6 +39,9 @@ const AddCustomerAddress = ({ onAddressAdded }) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handlePhoneChange = (value, name) => {
+        setFormData((prev) => ({ ...prev, [name]: value }));
+    };
     // Auto fetch state/district/mandal from pincode
     useEffect(() => {
         const fetchLocationDetails = async () => {
@@ -82,10 +86,10 @@ const AddCustomerAddress = ({ onAddressAdded }) => {
         }
 
         try {
-            const response = await fetch("http://127.0.0.1:8000/add-customer-address", {
+            const response = await fetch("http://65.0.183.78:8000/add-customer-address", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ customer_id, ...formData }),
+                body: JSON.stringify({ customer_id,...formData, mobile_number: `+${formData.mobile_number}`, alternate_mobile: formData.alternate_mobile ? `+${formData.alternate_mobile}` : "" }),
             });
 
             const data = await response.json();
@@ -148,11 +152,25 @@ const AddCustomerAddress = ({ onAddressAdded }) => {
                     <div className="manage-form-row">
                         <div className="manage-input-group">
                             <label>Mobile Number<span className="required-star">*</span></label>
-                            <input type="text" name="mobile_number" value={formData.mobile_number} onChange={handleChange} required pattern="\d{10}" />
+                            <PhoneInput
+                             type="text"
+                             inputProps={{ name: "mobile_number", required: true }}
+                             country={"in"}
+                             name="mobile_number" 
+                             value={formData.mobile_number} 
+                             onChange={(value) => handlePhoneChange(value, "mobile_number")}
+                             required pattern="\d{10}" />
                         </div>
                         <div className="manage-input-group">
                             <label>Alternate Mobile</label>
-                            <input type="text" name="alternate_mobile" value={formData.alternate_mobile} onChange={handleChange} />
+                            <PhoneInput
+                             country={"in"}
+                             type="text" 
+                             name="alternate_mobile" 
+                             value={formData.alternate_mobile} 
+                             onChange={(value) => handlePhoneChange(value, "alternate_mobile")}
+                             inputProps={{ name: "alternate_mobile" }}
+                              />
                         </div>
                     </div>
 

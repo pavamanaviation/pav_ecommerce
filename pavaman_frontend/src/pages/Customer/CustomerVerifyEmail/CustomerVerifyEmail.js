@@ -17,7 +17,7 @@ const VerifyEmail = () => {
         const verifyEmail = async () => {
             try {
                 const response = await axios.get(
-                    `http://127.0.0.1:8000/verify-email/${verification_link}/`
+                    `http://65.0.183.78:8000/verify-email/${verification_link}/`
                 );
                 if (response.data.message) {
                     setModalData({

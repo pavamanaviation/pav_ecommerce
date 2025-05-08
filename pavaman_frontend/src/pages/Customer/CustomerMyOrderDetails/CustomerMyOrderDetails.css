@@ -147,6 +147,27 @@
   color: #888;
   padding: 40px;
 }
+.customer-discount-section-original-price-myorder-details{
+  font-size: 15px;
+  margin-top: -32px;
+  color: rgb(109, 108, 108);
+  text-decoration: line-through;
+}
+.custom-quantity-title{
+margin-top: 5px;
+}
+.custom-quantity-price{
+  margin-top: -21px;
+}
+.gst{
+  color: #4541c1;
+  font-size: 19px;
+  font-weight: bold;
+  padding: 5px 10px;
+  /* border-radius: 5px; */
+  /* display: inline-block; */
+  margin-top: 2px;
+}
 
 /* Responsive Design */
 @media screen and (max-width: 768px) {

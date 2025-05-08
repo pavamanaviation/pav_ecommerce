@@ -23,7 +23,7 @@ const Navbar = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/", {
+      const response = await fetch("http://65.0.183.78:8000/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({}),
@@ -44,7 +44,7 @@ const Navbar = () => {
 
     setLoading(true);
     try {
-      const response = await fetch("http://127.0.0.1:8000/categories/view-sub-categories/", {
+      const response = await fetch("http://65.0.183.78:8000/categories/view-sub-categories/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -75,7 +75,7 @@ const Navbar = () => {
   
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/categories/${categoryName}/${subCategoryName}/`,
+        `http://65.0.183.78:8000/categories/${categoryName}/${subCategoryName}/`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

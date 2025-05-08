@@ -19,6 +19,8 @@ import PaidOrderDetails from "../AdminCustomerOrderViewDetails/AdminCustomerOrde
 import AdminDiscountProducts from "../AdminDiscounts/AdminDiscounts";
 import AdminAddDiscount from "../AdminDiscounts/AdminAddDiscounts";
 import AdminRatings from "../AdminRatings/AdminRatings";
+import TopBuyersPage from "../Dashboard/TopBuyers";
+import LowStockProductsPage from "../Dashboard/LowStockProductsPage";
 
 const AdminRoutes = ({ categories, setCategories, subcategories, setSubcategories, products, setProducts }) => {
   return (
@@ -44,6 +46,8 @@ const AdminRoutes = ({ categories, setCategories, subcategories, setSubcategorie
       <Route path="/discounts" element={<AdminDiscountProducts />} />
       <Route path="/add-discount" element={<AdminAddDiscount />}/>
       <Route path="/ratings" element={<AdminRatings />}/>
+      <Route path="/top-buyers" element={<TopBuyersPage />} />
+      <Route path="/low-stock-products" element={<LowStockProductsPage />} />
     </Routes>
   );
 };

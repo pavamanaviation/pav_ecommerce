@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./CustomerEditAddress.css";
 import PopupMessage from "../../../components/Popup/Popup";
+import PhoneInput from "react-phone-input-2";
 
 const CartEditAddress = ({ address, onEditCompleted }) => {
     const wrapperRef = useRef(null);
@@ -27,6 +28,7 @@ const CartEditAddress = ({ address, onEditCompleted }) => {
     const [popupMessage, setPopupMessage] = useState({ text: "", type: "" });
     const [showPopup, setShowPopup] = useState(false);
     const [loading, setLoading] = useState(false);
+    const customer_id = localStorage.getItem("customer_id");
 
     // Close when clicking outside
     useEffect(() => {
@@ -80,14 +82,17 @@ const CartEditAddress = ({ address, onEditCompleted }) => {
             fetchLocationDetails(value);
         }
     };
+    const handlePhoneChange = (value, name) => {
+        setFormData((prev) => ({ ...prev, [name]: value }));
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch("http://127.0.0.1:8000/edit-customer-address", {
+            const response = await fetch("http://65.0.183.78:8000/edit-customer-address", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({ customer_id,...formData, mobile_number: `+${formData.mobile_number}`, alternate_mobile: formData.alternate_mobile ? `+${formData.alternate_mobile}` : "" })
             });
 
             const data = await response.json();
@@ -146,25 +151,35 @@ const CartEditAddress = ({ address, onEditCompleted }) => {
 
                     <div className="form-row">
                         <div className="input-group">
-                            <input
+                            {/* <input
                                 className="input-text-field"
                                 type="text"
                                 name="mobile_number"
                                 value={formData.mobile_number}
                                 onChange={handleChange}
                                 required
+                            /> */}
+
+                        <label>Mobile Number <span className="required-star">*</span></label>
+                            <PhoneInput
+                                country={"in"}
+                                value={formData.mobile_number}
+                                onChange={(value) => handlePhoneChange(value, "mobile_number")}
+                                inputProps={{ name: "mobile_number", required: true }}
+                                // placeholder="Mobile Number"
+                                required
                             />
-                            <label>Mobile Number <span className="required-star">*</span></label>
+                            {/* <label>Mobile Number <span className="required-star">*</span></label> */}
                         </div>
                         <div className="input-group">
-                            <input
-                                className="input-text-field"
-                                type="text"
-                                name="alternate_mobile"
+                        <label>Alternate Mobile (Optional)</label>
+                        <PhoneInput
+                                country={"in"}
                                 value={formData.alternate_mobile}
-                                onChange={handleChange}
+                                onChange={(value) => handlePhoneChange(value, "alternate_mobile")}
+                                inputProps={{ name: "alternate_mobile" }}
                             />
-                            <label>Alternate Mobile (Optional)</label>
+                            {/* <label>Alternate Mobile (Optional)</label> */}
                         </div>
                     </div>
 

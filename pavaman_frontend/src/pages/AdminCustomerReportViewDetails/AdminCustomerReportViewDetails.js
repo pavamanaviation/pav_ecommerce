@@ -12,7 +12,7 @@
 //       try {
 //         const adminId = sessionStorage.getItem("admin_id") || 1;
 //         const response = await axios.post(
-//           "http://127.0.0.1:8000/get-payment-details-by-order",
+//           "http://65.0.183.78:8000/get-payment-details-by-order",
 //           {
 //             razorpay_order_id: orderId,
 //             admin_id: adminId
@@ -110,7 +110,7 @@
 //                   <td>
 //                     {item.product_image ? (
 //                       <img
-//                         src={`http://127.0.0.1:8000/${item.product_image}`}
+//                         src={`http://65.0.183.78:8000/${item.product_image}`}
 //                         alt={item.product_name}
 //                         height="50"
 //                       />

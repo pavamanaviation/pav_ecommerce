@@ -3497,7 +3497,12 @@ def filter_my_order(request):
             order_product_list = []
             for order in order_products:
                 product = ProductsDetails.objects.filter(id=order.product_id).first()
-                product_image = product.product_images[0] if product and product.product_images else ""
+                if product and product.product_images:
+                    product_image_path = product.product_images[0].replace('\\', '/')
+                    product_image_url = f"{settings.AWS_S3_BUCKET_URL}/{product_image_path.lstrip('/')}"
+                else:
+                    product_image_url = ""
+                # product_image = product.product_images[0] if product and product.product_images else ""
 
                 order_product_list.append({
                     "order_product_id": order.id,
@@ -3509,7 +3514,7 @@ def filter_my_order(request):
                     "shipping_status": order.shipping_status,
                     "delivery_status": order.delivery_status,
                     "product_id": order.product_id,
-                    "product_image": product_image,
+                    "product_image": product_image_url,
                     "product_name": product.product_name
                 })
 
@@ -3656,6 +3661,7 @@ def customer_get_payment_details_by_order(request):
                 "mobile_number": payment.customer.mobile_no,
                 "payment_mode": payment.payment_mode,
                 "total_quantity":payment.quantity,
+                "price":order.price,
                 "total_amount": payment.total_amount,
                 "payment_date": payment.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                 "product_order_id":payment.product_order_id,
@@ -3834,7 +3840,89 @@ def report_sales_summary(request):
     except Exception as e:
         return JsonResponse({"error": str(e), "status_code": 500}, status=500)
 
+# import calendar
+# from dateutil.relativedelta import relativedelta
+
+# @csrf_exempt
+# def report_monthly_revenue_by_year(request):
+#     if request.method != "POST":
+#         return JsonResponse({"error": "Only POST method allowed", "status_code": 405}, status=405)
+
+#     try:
+#         data = json.loads(request.body.decode("utf-8"))
+#         admin_id = data.get('admin_id')
+#         start_date_str = data.get('start_date_str')  # e.g., "2024-05-06"
+#         end_date_str = data.get('end_date_str')      # e.g., "2025-05-06"
+
+#         # If no start_date_str and end_date_str are provided, use the current year as default
+#         if not start_date_str or not end_date_str:
+#             current_year = datetime.now().year
+#             start_date_str = f"{current_year}-01-01"  # Start of the current year
+#             end_date_str = f"{current_year}-12-31"    # End of the current year
+
+#         if not admin_id:
+#             return JsonResponse({"error": "admin_id is required", "status_code": 400}, status=400)
+
+#         # Parse start_date and end_date
+#         try:
+#             start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
+#             end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
+#         except ValueError:
+#             return JsonResponse({"error": "Invalid date format. Use YYYY-MM-DD.", "status_code": 400}, status=400)
+
+#         # Validate the date range (end_date should be after start_date)
+#         if end_date < start_date:
+#             return JsonResponse({"error": "End date must be after start date", "status_code": 400}, status=400)
+
+#         # Check if start and end date span multiple years
+#         if start_date.year != end_date.year:
+#             # If the start date is in one year and the end date is in the next, show the error message
+#             if start_date.month < end_date.month:  
+#                 return JsonResponse({"error": "Please choose a date range within the same year", "status_code": 400}, status=400)
+
+#         # Get the months within the range
+#         monthly_revenue = {}
+#         current = start_date
+
+#         # Loop over the months within the date range
+#         while current <= end_date:
+#             key = f"{calendar.month_abbr[current.month]} {current.year}"
+#             monthly_revenue[key] = 0  # Initialize the month with 0 revenue
+#             current += relativedelta(months=1)  # Move to the next month
+
+#         # Filter payments within the given date range
+#         payments = PaymentDetails.objects.filter(
+#             admin_id=admin_id,
+#             created_at__date__gte=start_date.date(),
+#             created_at__date__lte=end_date.date()
+#         )
+
+#         # Calculate monthly revenue
+#         for payment in payments:
+#             key = f"{calendar.month_abbr[payment.created_at.month]} {payment.created_at.year}"
+#             if key in monthly_revenue:
+#                 monthly_revenue[key] += float(payment.total_amount)
+
+#         # Create a dummy price scale for the graph's y-axis (in increments of 50,000)
+#         dummy_y_axis = [i * 50000 for i in range(1, 11)]  # [50K, 100K, 150K, ..., 500K]
+
+#         return JsonResponse({
+#             "start_date": start_date_str,
+#             "end_date": end_date_str,
+#             "monthly_revenue": monthly_revenue,
+#             "status_code": 200,
+#             "admin_id": admin_id,
+#             "dummy_y_axis": dummy_y_axis  # Adding dummy price scale for the y-axis
+#         })
+
+#     except Exception as e:
+#         return JsonResponse({"error": str(e), "status_code": 500})
+
+from django.db import models
 import calendar
+import json
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 @csrf_exempt
 def report_monthly_revenue_by_year(request):
@@ -3844,34 +3932,156 @@ def report_monthly_revenue_by_year(request):
     try:
         data = json.loads(request.body.decode("utf-8"))
         admin_id = data.get('admin_id')
-        year = data.get('year')
+        action = data.get('action')  # "month" or "year"
 
-        if not admin_id or not year:
-            return JsonResponse({"error": "admin_id and year are required", "status_code": 400}, status=400)
+        if not admin_id:
+            return JsonResponse({"error": "admin_id is required", "status_code": 400}, status=400)
 
-        # Filter payments for that admin and year
-        payments = PaymentDetails.objects.filter(
-            admin_id=admin_id,
-            created_at__year=year
-        )
-
-        month_abbrs = list(calendar.month_abbr)[1:]
-        monthly_revenue = {month: 0 for month in month_abbrs}
-
-        for payment in payments:
-            month_index = payment.created_at.month
-            month_name = calendar.month_abbr[month_index]
-            monthly_revenue[month_name] += float(payment.total_amount)
-
-        return JsonResponse({
-            "year": year,
-            "monthly_revenue": monthly_revenue,
-            "status_code": 200,
-            "admin_id": admin_id
-        })
+        if action == "month":
+            return _report_monthly(data, admin_id)
+        elif action == "year":
+            return _report_yearly(admin_id)
+        elif action == "week":
+            return _report_weekly(data, admin_id)
+        else:
+            return JsonResponse({"error": "Invalid action. Use 'month' or 'year'.", "status_code": 400}, status=400)
 
     except Exception as e:
         return JsonResponse({"error": str(e), "status_code": 500})
+
+def _report_yearly(admin_id):
+    current_year = datetime.now().year
+    yearly_revenue = {}
+    start_year = current_year - 11  # 12 years total
+
+    for year in range(start_year, current_year + 1):
+        start_date = datetime(year, 1, 1)
+        end_date = datetime(year, 12, 31)
+        total = PaymentDetails.objects.filter(
+            admin_id=admin_id,
+            created_at__date__gte=start_date.date(),
+            created_at__date__lte=end_date.date()
+        ).aggregate(total_amount=models.Sum('total_amount'))['total_amount'] or 0
+        yearly_revenue[str(year)] = float(total)
+
+    dummy_y_axis = [i * 500000 for i in range(1, 11)]  # ₹5L, ₹10L, ..., ₹50L
+
+    return JsonResponse({
+        "report_type": "yearly",
+        "year_range": [start_year, current_year],
+        "yearly_revenue": yearly_revenue,
+        "admin_id": admin_id,
+        "dummy_y_axis": dummy_y_axis,
+        "status_code": 200
+    })
+
+def _report_monthly(data, admin_id):
+    start_date_str = data.get('start_date_str')
+    end_date_str = data.get('end_date_str')
+
+    if not start_date_str or not end_date_str:
+        current_year = datetime.now().year
+        start_date_str = f"{current_year}-01-01"
+        end_date_str = f"{current_year}-12-31"
+
+    try:
+        start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
+        end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
+    except ValueError:
+        return JsonResponse({"error": "Invalid date format. Use YYYY-MM-DD.", "status_code": 400}, status=400)
+
+    if end_date < start_date:
+        return JsonResponse({"error": "End date must be after start date", "status_code": 400}, status=400)
+
+    if start_date.year != end_date.year:
+        if start_date.month < end_date.month:
+            return JsonResponse({"error": "Please choose a date range within the same year", "status_code": 400}, status=400)
+
+    monthly_revenue = {}
+    current = start_date
+    while current <= end_date:
+        key = f"{calendar.month_abbr[current.month]} {current.year}"
+        monthly_revenue[key] = 0
+        current += relativedelta(months=1)
+
+    payments = PaymentDetails.objects.filter(
+        admin_id=admin_id,
+        created_at__date__gte=start_date.date(),
+        created_at__date__lte=end_date.date()
+    )
+
+    for payment in payments:
+        key = f"{calendar.month_abbr[payment.created_at.month]} {payment.created_at.year}"
+        if key in monthly_revenue:
+            monthly_revenue[key] += float(payment.total_amount)
+
+    dummy_y_axis = [i * 50000 for i in range(1, 11)]
+
+    return JsonResponse({
+        "report_type": "monthly",
+        "start_date": start_date_str,
+        "end_date": end_date_str,
+        "monthly_revenue": monthly_revenue,
+        "admin_id": admin_id,
+        "dummy_y_axis": dummy_y_axis,
+        "status_code": 200
+    })
+
+def _report_weekly(data, admin_id):
+# def _report_daywise_by_week(data, admin_id):
+    start_date_str = data.get('start_date_str')
+    end_date_str = data.get('end_date_str')
+
+    # Default to last 7 days (today inclusive)
+    if not start_date_str or not end_date_str:
+        end_date = datetime.now().date()
+        start_date = end_date - relativedelta(days=6)
+    else:
+        try:
+            start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+            end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+        except ValueError:
+            return JsonResponse({"error": "Invalid date format. Use YYYY-MM-DD.", "status_code": 400}, status=400)
+
+    # Validate 7-day range max
+    delta_days = (end_date - start_date).days
+    if delta_days < 0:
+        return JsonResponse({"error": "End date must be after start date", "status_code": 400}, status=400)
+    if delta_days > 6:
+        return JsonResponse({"error": "Only 7-day range allowed", "status_code": 400}, status=400)
+
+    # Initialize dictionary with day name + date
+    daywise_revenue = {}
+    for i in range(delta_days + 1):
+        date = start_date + relativedelta(days=i)
+        label = f"{date.strftime('%A')} ({date.strftime('%d %b %Y')})"  # Example: "Wednesday (30 Apr 2025)"
+        daywise_revenue[label] = 0
+
+    # Get all relevant payments
+    payments = PaymentDetails.objects.filter(
+        admin_id=admin_id,
+        created_at__date__gte=start_date,
+        created_at__date__lte=end_date
+    )
+
+    # Accumulate revenue per day
+    for payment in payments:
+        pay_date = payment.created_at.date()
+        label = f"{pay_date.strftime('%A')} ({pay_date.strftime('%d %b %Y')})"
+        if label in daywise_revenue:
+            daywise_revenue[label] += float(payment.total_amount)
+
+    dummy_y_axis = [i * 10000 for i in range(1, 11)]  # ₹10K to ₹100K
+
+    return JsonResponse({
+        "report_type": "daywise_week",
+        "start_date": str(start_date),
+        "end_date": str(end_date),
+        "daywise_revenue": daywise_revenue,
+        "admin_id": admin_id,
+        "dummy_y_axis": dummy_y_axis,
+        "status_code": 200
+    })
 
 from collections import Counter
 
@@ -4702,113 +4912,113 @@ def submit_feedback_rating(request):
         }, status=405)
 
 
-@csrf_exempt
-def submit_feedback_rating(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body.decode("utf-8"))
+# @csrf_exempt
+# def submit_feedback_rating(request):
+#     if request.method == "POST":
+#         try:
+#             data = json.loads(request.body.decode("utf-8"))
 
-            customer_id = data.get('customer_id')
-            product_id = data.get('product_id')
-            product_order_id = data.get('product_order_id')
-            rating = data.get('rating')  # Optional
-            feedback = data.get('feedback', "")  # Optional
+#             customer_id = data.get('customer_id')
+#             product_id = data.get('product_id')
+#             product_order_id = data.get('product_order_id')
+#             rating = data.get('rating')  # Optional
+#             feedback = data.get('feedback', "")  # Optional
 
-            # Validate required fields
-            if not all([customer_id, product_id, product_order_id]):
-                return JsonResponse({
-                    "error": "customer_id, product_id, and product_order_id are required.",
-                    "status_code": 400
-                }, status=400)
+#             # Validate required fields
+#             if not all([customer_id, product_id, product_order_id]):
+#                 return JsonResponse({
+#                     "error": "customer_id, product_id, and product_order_id are required.",
+#                     "status_code": 400
+#                 }, status=400)
 
-            # Fetch related objects
-            try:
-                customer = CustomerRegisterDetails.objects.get(id=customer_id)
-                product = ProductsDetails.objects.get(id=product_id)
-                admin = product.admin  # Assuming ProductsDetails has 'admin' FK
+#             # Fetch related objects
+#             try:
+#                 customer = CustomerRegisterDetails.objects.get(id=customer_id)
+#                 product = ProductsDetails.objects.get(id=product_id)
+#                 admin = product.admin  # Assuming ProductsDetails has 'admin' FK
 
-                # Get payment using product_order_id
-                payment = PaymentDetails.objects.filter(
-                    customer=customer, product_order_id=product_order_id
-                ).first()
-                if not payment:
-                    return JsonResponse({
-                        "error": "Payment not found for given product_order_id.",
-                        "status_code": 404
-                    }, status=404)
+#                 # Get payment using product_order_id
+#                 payment = PaymentDetails.objects.filter(
+#                     customer=customer, product_order_id=product_order_id
+#                 ).first()
+#                 if not payment:
+#                     return JsonResponse({
+#                         "error": "Payment not found for given product_order_id.",
+#                         "status_code": 404
+#                     }, status=404)
 
-                # Find matching order_product ID from payment.order_product_ids list
-                order_product = OrderProducts.objects.filter(
-                    id__in=payment.order_product_ids,
-                    product=product,
-                    customer=customer
-                ).first()
-                if not order_product:
-                    return JsonResponse({
-                        "error": "Matching order product not found.",
-                        "status_code": 404
-                    }, status=404)
+#                 # Find matching order_product ID from payment.order_product_ids list
+#                 order_product = OrderProducts.objects.filter(
+#                     id__in=payment.order_product_ids,
+#                     product=product,
+#                     customer=customer
+#                 ).first()
+#                 if not order_product:
+#                     return JsonResponse({
+#                         "error": "Matching order product not found.",
+#                         "status_code": 404
+#                     }, status=404)
 
-            except Exception as e:
-                return JsonResponse({
-                    "error": f"Related object fetch error: {str(e)}",
-                    "status_code": 404
-                }, status=404)
+#             except Exception as e:
+#                 return JsonResponse({
+#                     "error": f"Related object fetch error: {str(e)}",
+#                     "status_code": 404
+#                 }, status=404)
 
-            # Check if feedback already exists
-            existing_feedback = FeedbackRating.objects.filter(
-                customer=customer, product=product, order_product=order_product
-            ).first()
-            if existing_feedback:
-                return JsonResponse({
-                    "error": "Feedback already submitted for this product and order.",
-                    "status_code": 400
-                }, status=400)
-            current_time = datetime.utcnow() + timedelta(hours=5, minutes=30)
-            # formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+#             # Check if feedback already exists
+#             existing_feedback = FeedbackRating.objects.filter(
+#                 customer=customer, product=product, order_product=order_product
+#             ).first()
+#             if existing_feedback:
+#                 return JsonResponse({
+#                     "error": "Feedback already submitted for this product and order.",
+#                     "status_code": 400
+#                 }, status=400)
+#             current_time = datetime.utcnow() + timedelta(hours=5, minutes=30)
+#             # formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
 
-            # Create feedback
-            FeedbackRating.objects.create(
-                admin=admin,
-                customer=customer,
-                payment=payment,
-                order_product=order_product,
-                order_id=product_order_id,
-                product=product,
-                category=product.category.category_name if product.category else "",
-                sub_category=product.sub_category.sub_category_name if product.sub_category else "",
-                rating=rating if rating else None,
-                feedback=feedback,
-                created_at=current_time
-            )
-            # current_time = datetime.utcnow() + timedelta(hours=5, minutes=30)
-            # formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+#             # Create feedback
+#             FeedbackRating.objects.create(
+#                 admin=admin,
+#                 customer=customer,
+#                 payment=payment,
+#                 order_product=order_product,
+#                 order_id=product_order_id,
+#                 product=product,
+#                 category=product.category.category_name if product.category else "",
+#                 sub_category=product.sub_category.sub_category_name if product.sub_category else "",
+#                 rating=rating if rating else None,
+#                 feedback=feedback,
+#                 created_at=current_time
+#             )
+#             # current_time = datetime.utcnow() + timedelta(hours=5, minutes=30)
+#             # formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
 
 
-            return JsonResponse({
-                "message": "Feedback submitted successfully.",
-                "status_code": 201,
-                "customer_id":customer_id,
-                "submitted_at": current_time
-            }, status=201)
+#             return JsonResponse({
+#                 "message": "Feedback submitted successfully.",
+#                 "status_code": 201,
+#                 "customer_id":customer_id,
+#                 "submitted_at": current_time
+#             }, status=201)
 
-        except json.JSONDecodeError:
-            return JsonResponse({
-                "error": "Invalid JSON format.",
-                "status_code": 400
-            }, status=400)
+#         except json.JSONDecodeError:
+#             return JsonResponse({
+#                 "error": "Invalid JSON format.",
+#                 "status_code": 400
+#             }, status=400)
 
-        except Exception as e:
-            return JsonResponse({
-                "error": f"Server error: {str(e)}",
-                "status_code": 500
-            }, status=500)
+#         except Exception as e:
+#             return JsonResponse({
+#                 "error": f"Server error: {str(e)}",
+#                 "status_code": 500
+#             }, status=500)
 
-    else:
-        return JsonResponse({
-            "error": "Invalid HTTP method. Only POST allowed.",
-            "status_code": 405
-        }, status=405)
+#     else:
+#         return JsonResponse({
+#             "error": "Invalid HTTP method. Only POST allowed.",
+#             "status_code": 405
+#         }, status=405)
 
 # @csrf_exempt
 # def filter_my_order(request):
@@ -5079,6 +5289,8 @@ def view_rating(request):
                     "rating": feedback.rating,
                     "product_id": feedback.product.id,
                     "product_name": feedback.product.product_name,
+                    "order_product_id": feedback.order_product.id,
+                    "order_id": feedback.order_id,
                 })
 
             return JsonResponse({

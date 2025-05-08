@@ -38,7 +38,7 @@ const RazorpayPayment = ({ orderSummary }) => {
         }));
 
         try {
-            const response = await fetch("http://127.0.0.1:8000/create-razorpay-order", {
+            const response = await fetch("http://65.0.183.78:8000/create-razorpay-order", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ customer_id: customerId, order_products: orderProducts }),
@@ -56,7 +56,7 @@ const RazorpayPayment = ({ orderSummary }) => {
                 description: `Payment for Order(s): ${orderProducts.map(o => o.order_id).join(", ")}`,
                 order_id: orderData.razorpay_order_id,
                 handler: async (paymentResponse) => {
-                    const verifyResponse = await fetch("http://127.0.0.1:8000/razorpay-callback", {
+                    const verifyResponse = await fetch("http://65.0.183.78:8000/razorpay-callback", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({

@@ -44,7 +44,7 @@ const AddSpecification = () => {
     }
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/add-product-specifications", {
+      const response = await axios.post("http://65.0.183.78:8000/add-product-specifications", {
         admin_id,
         category_id,
         sub_category_id,

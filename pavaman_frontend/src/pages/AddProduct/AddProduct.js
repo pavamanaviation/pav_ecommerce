@@ -77,7 +77,7 @@ const AddProduct = () => {
         });
 
         try {
-            const response = await fetch("http://127.0.0.1:8000/add-product", {
+            const response = await fetch("http://65.0.183.78:8000/add-product", {
                 method: "POST",
                 body: formDataToSend,
             });

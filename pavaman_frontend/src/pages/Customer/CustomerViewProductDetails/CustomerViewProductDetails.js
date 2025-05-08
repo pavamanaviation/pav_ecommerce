@@ -55,7 +55,7 @@ const CustomerViewProductDetails = () => {
         setError("");
 
         try {
-            const response = await fetch(`http://127.0.0.1:8000/products/${product_name}/`, {
+            const response = await fetch(`http://65.0.183.78:8000/products/${product_name}/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -115,7 +115,7 @@ const CustomerViewProductDetails = () => {
         }
 
         try {
-            const response = await fetch("http://127.0.0.1:8000/add-cart-product", {
+            const response = await fetch("http://65.0.183.78:8000/add-cart-product", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -161,7 +161,7 @@ const CustomerViewProductDetails = () => {
         }
 
         try {
-            const response = await fetch("http://127.0.0.1:8000/products/order-multiple-products", { // Updated API endpoint
+            const response = await fetch("http://65.0.183.78:8000/products/order-multiple-products", { // Updated API endpoint
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -192,7 +192,7 @@ const CustomerViewProductDetails = () => {
 
     const handleDownloadMaterialFile = async (productId) => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/download-material/${productId}/`);
+            const response = await fetch(`http://65.0.183.78:8000/download-material/${productId}/`);
 
             if (!response.ok) {
                 throw new Error("Failed to download file.");
@@ -368,10 +368,15 @@ const CustomerViewProductDetails = () => {
                                 </span>
                             </p>
                             <p className="customer-sku">SKU: {productDetails.sku_number}</p>
-                            <p className="customer-price">₹ {productDetails.final_price} /- <span>(Incl. GST)</span></p>
+                            <p className="customer-price">₹ {productDetails.final_price} /- <span>(Incl. GST)</span>
+                            <span className="discount-tag">
+                                            {productDetails.discount &&  parseFloat (productDetails.discount) > 0 && `${productDetails.discount} off`}
+                                        </span></p>
+                            
+                            {productDetails.price !== productDetails.final_price && (
                             <p className="customer-original-price">₹ {productDetails.price}  /- <span>(Incl. GST)</span></p>
-
-
+                        )}
+                        
                             {(productDetails.availability === "Very Few Products Left" || productDetails.availability === "In Stock") && (
                                 <div className="customer-wishlist-buttons">
                                     <button className="customer-wishlist-button"

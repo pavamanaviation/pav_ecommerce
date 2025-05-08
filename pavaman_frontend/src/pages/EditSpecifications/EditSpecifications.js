@@ -32,7 +32,7 @@ const EditSpecification = () => {
     };
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/edit-product-specifications", requestData);
+      const response = await axios.post("http://65.0.183.78:8000/edit-product-specifications", requestData);
       if (response.data.status_code === 200) {
         alert("Specifications updated successfully!");
         navigate(-1); // Go back to product details page

@@ -40,7 +40,7 @@ const [specMessage, setSpecMessage] = useState("");
 
   const fetchProductDetails = async () => {
     try {
-      const response = await axios.post("http://127.0.0.1:8000/view-product-details", {
+      const response = await axios.post("http://65.0.183.78:8000/view-product-details", {
         admin_id,
         category_id,
         sub_category_id,
@@ -51,7 +51,7 @@ const [specMessage, setSpecMessage] = useState("");
         setProductDetails(response.data);
         const images = response.data.product_details.product_images;
         if (images?.length > 0) {
-          setMainImage(`http://127.0.0.1:8000/${images[0]}`);
+          setMainImage(`http://65.0.183.78:8000/${images[0]}`);
         }
       } else {
         setError(response.data.error || "Failed to fetch product details.");
@@ -135,7 +135,7 @@ const [specMessage, setSpecMessage] = useState("");
     }
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/add-product-specifications", {
+      const response = await axios.post("http://65.0.183.78:8000/add-product-specifications", {
         admin_id,
         category_id,
         sub_category_id,
@@ -165,7 +165,7 @@ const [specMessage, setSpecMessage] = useState("");
   // Submit Edit Specifications
   const handleSubmitEditedSpecifications = async () => {
     try {
-      const response = await axios.post("http://127.0.0.1:8000/edit-product-specifications", {
+      const response = await axios.post("http://65.0.183.78:8000/edit-product-specifications", {
         admin_id,
         category_id,
         sub_category_id,
@@ -214,7 +214,7 @@ const [specMessage, setSpecMessage] = useState("");
 
                   {productDetails.product_details.product_images?.length > 0 ? (
                     <img
-                      src={`http://127.0.0.1:8000/${productDetails.product_details.product_images[mainImageIndex]}`}
+                      src={`http://65.0.183.78:8000/${productDetails.product_details.product_images[mainImageIndex]}`}
                       alt="Main Product"
                       className="main-product-img"
                     />
@@ -234,7 +234,7 @@ const [specMessage, setSpecMessage] = useState("");
                   {productDetails.product_details.product_images?.map((img, index) => (
                     <img
                       key={index}
-                      src={`http://127.0.0.1:8000/${img}`}
+                      src={`http://65.0.183.78:8000/${img}`}
                       alt={`Product ${index + 1}`}
                       className={`thumbnail-img ${mainImageIndex === index ? "active-thumbnail" : ""}`}
                       onClick={() => setMainImageIndex(index)}
@@ -427,7 +427,7 @@ const [specMessage, setSpecMessage] = useState("");
                   {productDetails.product_details.material_file ? (
                     <button className="button-material">
 
-                      <a href={`http://127.0.0.1:8000/${productDetails.product_details.material_file}`} target="_blank" rel="noopener noreferrer">
+                      <a href={`http://65.0.183.78:8000/${productDetails.product_details.material_file}`} target="_blank" rel="noopener noreferrer">
                         View Material
                       </a>
                     </button>

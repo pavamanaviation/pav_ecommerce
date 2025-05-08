@@ -20,7 +20,7 @@ const Report = () => {
         }
 
         const response = await axios.post(
-          "http://127.0.0.1:8000/get-payment-details-by-order",
+          "http://65.0.183.78:8000/get-payment-details-by-order",
           { admin_id: adminId }
         );
 

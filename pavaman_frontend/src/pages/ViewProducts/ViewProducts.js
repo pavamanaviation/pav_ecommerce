@@ -52,7 +52,7 @@ const ViewProducts = ({ products, setProducts }) => {
 
   const fetchProducts = async (adminId) => {
     try {
-      const response = await axios.post("http://127.0.0.1:8000/view-products", {
+      const response = await axios.post("http://65.0.183.78:8000/view-products", {
         admin_id: adminId,
         category_id,
         sub_category_id,
@@ -105,7 +105,7 @@ const ViewProducts = ({ products, setProducts }) => {
     }
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/delete-product", {
+      const response = await axios.post("http://65.0.183.78:8000/delete-product", {
         admin_id: adminId,
         category_id,
         sub_category_id,

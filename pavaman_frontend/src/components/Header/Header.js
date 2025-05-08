@@ -61,13 +61,13 @@ const Header = ({ setIsAuthenticated, setCategories, setSubcategories, setProduc
         let requestBody = {};
     
         if (location.pathname.includes("/view-categories")) {
-            apiUrl = "http://127.0.0.1:8000/search-categories";
+            apiUrl = "http://65.0.183.78:8000/search-categories";
             requestBody = {
                 admin_id: sessionStorage.getItem("admin_id"),
                 category_name: searchQuery,
             };
         } else if (location.pathname.includes("/view-subcategories")) {
-            apiUrl = "http://127.0.0.1:8000/search-subcategories";
+            apiUrl = "http://65.0.183.78:8000/search-subcategories";
             const categoryData = JSON.parse(sessionStorage.getItem("categoryData") || "{}");
             requestBody = {
                 admin_id: sessionStorage.getItem("admin_id"),
@@ -75,7 +75,7 @@ const Header = ({ setIsAuthenticated, setCategories, setSubcategories, setProduc
                 sub_category_name: searchQuery,
             };
         } else if (location.pathname.includes("/view-products")) {
-            apiUrl = "http://127.0.0.1:8000/search-products";
+            apiUrl = "http://65.0.183.78:8000/search-products";
             const categoryData = JSON.parse(sessionStorage.getItem("categoryData") || "{}");
             const subCategoryData = JSON.parse(sessionStorage.getItem("subCategoryData") || "{}");
             requestBody = {
@@ -122,7 +122,7 @@ const Header = ({ setIsAuthenticated, setCategories, setSubcategories, setProduc
     const fetchCategories = async () => {
         setErrorMessage("");
         try {
-            const response = await axios.post("http://127.0.0.1:8000/view-categories", {
+            const response = await axios.post("http://65.0.183.78:8000/view-categories", {
                 admin_id: sessionStorage.getItem("admin_id"),
             }, { withCredentials: true });
             setCategories(response.data.categories || []);
@@ -134,7 +134,7 @@ const Header = ({ setIsAuthenticated, setCategories, setSubcategories, setProduc
     const fetchSubcategories = async () => {
         setErrorMessage("");
         try {
-            const response = await axios.post("http://127.0.0.1:8000/view-subcategories", {
+            const response = await axios.post("http://65.0.183.78:8000/view-subcategories", {
                 admin_id: sessionStorage.getItem("admin_id"),
                 category_id: JSON.parse(sessionStorage.getItem("categoryData") || "{}").category_id,
             }, { withCredentials: true });
@@ -147,7 +147,7 @@ const Header = ({ setIsAuthenticated, setCategories, setSubcategories, setProduc
     const fetchProducts = async () => {
         setErrorMessage("");
         try {
-            const response = await axios.post("http://127.0.0.1:8000/view-products", {
+            const response = await axios.post("http://65.0.183.78:8000/view-products", {
                 admin_id: sessionStorage.getItem("admin_id"),
                 category_id: JSON.parse(sessionStorage.getItem("categoryData") || "{}").category_id,
                 sub_category_id: JSON.parse(sessionStorage.getItem("subCategoryData") || "{}").sub_category_id,

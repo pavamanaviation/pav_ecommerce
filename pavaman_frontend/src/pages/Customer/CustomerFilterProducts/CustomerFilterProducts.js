@@ -68,7 +68,7 @@ const FilteredProducts = () => {
         }
 
         try {
-            const response = await fetch("http://127.0.0.1:8000/add-cart-product", {
+            const response = await fetch("http://65.0.183.78:8000/add-cart-product", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ customer_id, product_id, quantity: 1 }),

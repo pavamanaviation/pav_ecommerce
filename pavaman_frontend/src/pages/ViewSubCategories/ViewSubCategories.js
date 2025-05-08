@@ -38,7 +38,7 @@ const ViewSubcategories = ({ subcategories, setSubcategories }) => {
     }
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/view-subcategories", {
+      const response = await fetch("http://65.0.183.78:8000/view-subcategories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ admin_id: adminId, category_id }),
@@ -81,7 +81,7 @@ const ViewSubcategories = ({ subcategories, setSubcategories }) => {
     }
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/delete-subcategory", {
+      const response = await fetch("http://65.0.183.78:8000/delete-subcategory", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

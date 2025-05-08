@@ -52,7 +52,7 @@ const AdminCustomerReports = () => {
 
   const fetchSalesSummary = async (admin_id) => {
     try {
-      const res = await axios.post('http://127.0.0.1:8000/report-sales-summary', { admin_id });
+      const res = await axios.post('http://65.0.183.78:8000/report-sales-summary', { admin_id });
       if (res.data.status_code === 200) {
         setSummary({
           today: res.data.today_sales_amount,
@@ -67,7 +67,7 @@ const AdminCustomerReports = () => {
 
   const fetchMonthlyRevenue = async (admin_id) => {
     try {
-      const res = await axios.post('http://127.0.0.1:8000/report-monthly-revenue-by-year', {
+      const res = await axios.post('http://65.0.183.78:8000/report-monthly-revenue-by-year', {
         admin_id,
         year: reportYear
       });
@@ -81,7 +81,7 @@ const AdminCustomerReports = () => {
 
   const fetchTopProducts = async (admin_id) => {
     try {
-      const res = await axios.post('http://127.0.0.1:8000/top-five-selling-products', { admin_id });
+      const res = await axios.post('http://65.0.183.78:8000/top-five-selling-products', { admin_id });
       if (res.data.status_code === 200) {
         setTopProducts(res.data.top_5_products);
       }
@@ -92,7 +92,7 @@ const AdminCustomerReports = () => {
 
   const fetchOrderStatusSummary = async (admin_id) => {
     try {
-      const res = await axios.post('http://127.0.0.1:8000/order-status-summary', { admin_id });
+      const res = await axios.post('http://65.0.183.78:8000/order-status-summary', { admin_id });
       if (res.data.status_code === 200 && res.data.order_status_summary) {
         const data = res.data.order_status_summary;
         const transformed = Object.entries(data).map(([status, value]) => ({

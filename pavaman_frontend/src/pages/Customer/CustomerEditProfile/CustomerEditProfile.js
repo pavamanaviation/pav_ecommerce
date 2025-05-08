@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./CustomerEditProfile.css";
 import PopupMessage from "../../../components/Popup/Popup";
+import PhoneInput from "react-phone-input-2";
+import 'react-phone-input-2/lib/style.css';
+
 
 const CustomerEditProfile = () => {
     const location = useLocation();
@@ -45,10 +48,15 @@ const CustomerEditProfile = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handlePhoneChange = (value) => {
+        setFormData((prev) => ({ ...prev, mobile_no: "+" + value }));
+    };
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch("http://127.0.0.1:8000/edit-customer-profile", {
+            const response = await fetch("http://65.0.183.78:8000/edit-customer-profile", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -125,17 +133,23 @@ const CustomerEditProfile = () => {
 
                 <div className="input-single">
                     <h3 className="profile-edit-heading-first">Mobile Number</h3>
-                    <input
-                        className="Customer-input-row-edit-profile"
-                        type="text"
-                        name="mobile_no"
-                        id="mobile_no"
-                        placeholder="Mobile Number"
-                        value={formData.mobile_no}
-                        onChange={handleChange}
-                        pattern="\d{10}"
-                        title="Mobile number must be exactly 10 digits"
-                        required
+                    <PhoneInput
+                        // className="Customer-input-row-edit-profile"
+                        // type="text"
+                        // name="mobile_no"
+                        // id="mobile_no"
+                        // placeholder="Mobile Number"
+                        // value={formData.mobile_no}
+                        // onChange={handleChange}
+                        // pattern="\d{10}"
+                        // title="Mobile number must be exactly 10 digits"
+                        // required
+                                country={"in"}
+                                value={formData.mobile_number}
+                                onChange={(value) => handlePhoneChange(value, "mobile_number")}
+                                inputProps={{ name: "mobile_number", required: true }}
+                                placeholder="Mobile Number"
+                                required
                     />
                 </div>
 

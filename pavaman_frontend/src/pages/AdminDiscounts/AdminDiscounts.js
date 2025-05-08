@@ -21,7 +21,7 @@ const AdminDiscountProducts = () => {
 
   const fetchDiscountProducts = async () => {
     try {
-      const response = await axios.post('http://127.0.0.1:8000/discount-products', {
+      const response = await axios.post('http://65.0.183.78:8000/discount-products', {
         admin_id: adminId,
       });
 
@@ -40,7 +40,7 @@ const AdminDiscountProducts = () => {
   const downloadExcel = async () => {
     try {
       const response = await axios.post(
-        'http://127.0.0.1:8000/download-discount-products-excel',
+        'http://65.0.183.78:8000/download-discount-products-excel',
         { admin_id: adminId },
         { responseType: 'blob' }
       );
